@@ -1,0 +1,164 @@
+﻿@model IEnumerable<Homework_portal.Models.Ders>
+@{
+    ViewData["Title"] = "Ders Yönetimi";
+}
+
+<div id="alert-placeholder"></div>
+
+@if (TempData["success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Ders Yönetimi</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Anasayfa</a></li>
+        <li class="breadcrumb-item active">Dersler</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-book-open me-1"></i>
+            Ders Listesi
+            <a asp-action="Upsert" class="btn btn-primary btn-sm float-end">
+                <i class="fas fa-plus me-1"></i> Yeni Ders Ekle
+            </a>
+        </div>
+        <div class="card-body">
+            <table id="derslerTablosu" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Ders Adı</th>
+                        <th>Açıklama</th>
+                        <th>Öğretmen</th>
+                        <th style="width: 150px;">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ders in Model)
+                    {
+                        <tr id="ders-@ders.Id">
+                            <td>@ders.Ad</td>
+                            <td>@ders.Aciklama</td>
+                            <td>@ders.Ogretmen.Ad @ders.Ogretmen.Soyad</td>
+                            <td>
+                                <a asp-action="Upsert" asp-route-id="@ders.Id" class="btn btn-warning btn-sm" title="Düzenle">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-danger btn-sm btn-delete"
+                                        data-id="@ders.Id"
+                                        data-name="@ders.Ad"
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Dersi Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <strong><span id="dersAdiText"></span></strong> adlı dersi silmek istediğinizden emin misiniz?
+                <br />
+                <small class_="text-danger">Bu işlem geri alınamaz!</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            var dersIdToDelete;
+            var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'), {});
+
+            // 1. Kullanıcı "Sil" (çöp kutusu) butonuna tıkladığında:
+            $('.btn-delete').on('click', function () {
+                // Tıklanan butonun data-id ve data-name özelliklerini al
+                dersIdToDelete = $(this).data('id');
+                var dersAdi = $(this).data('name');
+
+                // Modal'ın içindeki yazıya dersin adını yaz
+                $('#dersAdiText').text(dersAdi);
+
+                // Modal'ı (pop-up) göster
+                deleteModal.show();
+            });
+
+            // 2. Kullanıcı Modal'ın içindeki "Evet, Sil" butonuna tıkladığında:
+            $('#confirmDeleteButton').on('click', function () {
+
+                // AJAX isteğini başlat (jQuery $.ajax)
+                $.ajax({
+                    url: '/Admin/Ders/DeleteById', // Controller'daki metodumuzun yolu
+                    type: 'DELETE', // Metodun tipi [HttpDelete]
+                    data: { id: dersIdToDelete }, // Gönderilecek veri (dersin ID'si)
+                    success: function (data) {
+                        // 3a. Başarılı olursa (Controller'dan success:true dönerse):
+                        if (data.success) {
+                            // Modal'ı kapat
+                            deleteModal.hide();
+
+                            // Tablodan ilgili satırı (örn: <tr id="ders-12">) kaldır
+                            $('#ders-' + dersIdToDelete).remove();
+
+                            // Başarı mesajı göster
+                            showAlert('success', data.message);
+                        } else {
+                            // 3b. Başarısız olursa (Controller'dan success:false dönerse):
+                            deleteModal.hide();
+                            showAlert('danger', data.message);
+                        }
+                    },
+                    error: function () {
+                        // 3c. Sunucu hatası (500, 404 vb.) olursa:
+                        deleteModal.hide();
+                        showAlert('danger', 'Bir sunucu hatası oluştu. Lütfen tekrar deneyin.');
+                    }
+                });
+            });
+
+            // AJAX mesajlarını göstermek için yardımcı fonksiyon
+            function showAlert(type, message) {
+                var placeholder = $('#alert-placeholder');
+                var wrapper = $('<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+                              message +
+                              '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                placeholder.append(wrapper);
+
+                // Mesajın 5 saniye sonra otomatik kapanmasını sağla
+                setTimeout(function() {
+                    wrapper.alert('close');
+                }, 5000);
+            }
+        });
+    </script>
+}

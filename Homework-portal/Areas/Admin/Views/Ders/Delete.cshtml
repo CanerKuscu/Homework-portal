@@ -1,0 +1,44 @@
+﻿@model Homework_portal.Models.Ders
+@{
+    ViewData["Title"] = "Dersi Sil";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Dersi Sil</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Anasayfa</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Ders" asp-action="Index">Dersler</a></li>
+        <li class="breadcrumb-item active">Dersi Sil</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card bg-danger text-white">
+                <div class="card-header">
+                    <h4 class="card-title">EMİN MİSİNİZ?</h4>
+                </div>
+                <div class="card-body">
+                    <p>Aşağıdaki dersi kalıcı olarak silmek üzeresiniz:</p>
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Ders Adı</dt>
+                        <dd class="col-sm-9">@Model.Ad</dd>
+                        <dt class="col-sm-3">Öğretmen</dt>
+                        <dd class="col-sm-9">@Model.Ogretmen.Ad @Model.Ogretmen.Soyad</dd>
+                    </dl>
+
+                    <form method="post" asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> EVET, SİL
+                        </button>
+                        <a asp-action="Index" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-1"></i> HAYIR, İPTAL ET
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

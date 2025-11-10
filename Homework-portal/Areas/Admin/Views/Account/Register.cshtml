@@ -1,0 +1,82 @@
+﻿@using Homework_portal.Models.ViewModels
+@using Homework_portal.Utility
+@model RegisterVM
+@{
+    // Layout = null; SATIRINI SİLİYORUZ, ARTIK ADMİN PANELİNİ KULLANACAK
+    ViewData["Title"] = "Yeni Kullanıcı Oluştur"; // BAŞLIĞI DEĞİŞTİRDİK
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Anasayfa</a></li>
+        <li class="breadcrumb-item active">Yeni Kullanıcı Oluştur</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Kullanıcı Bilgileri</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Register" method="post">
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Ad" class="form-label"></label>
+                                <input asp-for="Ad" class="form-control" />
+                                <span asp-validation-for="Ad" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Soyad" class="form-label"></label>
+                                <input asp-for="Soyad" class="form-control" />
+                                <span asp-validation-for="Soyad" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" class="form-control" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label"></label>
+                            <input asp-for="ConfirmPassword" class="form-control" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Role" class="form-label">Kullanıcı Tipi (Rol)</label> <select asp-for="Role" class="form-select">
+                                <option value="">-- Rol Seçin --</option>
+                                <option value="@AppRoles.Role_Admin">Admin</option>
+                                <option value="@AppRoles.Role_Ogretmen">Öğretmen</option>
+                                <option value="@AppRoles.Role_Ogrenci">Öğrenci</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+
+                        <button class="btn btn-success" type="submit">
+                            <i class="fas fa-plus me-1"></i> Kullanıcıyı Oluştur
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
