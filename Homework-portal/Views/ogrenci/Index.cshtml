@@ -1,0 +1,60 @@
+﻿// ---- GÜNCEL KOD ----
+// Dosya Yolu: Homework-portal/Views/Ogrenci/Index.cshtml
+
+// Model olarak Controller'dan gönderdiğimiz 'DersKayit' listesini alıyoruz
+@model IEnumerable<Homework_portal.Models.DersKayit>
+
+@{
+    ViewData["Title"] = "Derslerim";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-primary">Derslerim</h2>
+            <hr />
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        // Eğer öğrenci hiçbir derse kayıtlı değilse
+        <div class="alert alert-warning" role="alert">
+            Şu anda kayıtlı olduğunuz bir ders bulunmamaktadır.
+        </div>
+    }
+    else
+    {
+        // Dersleri 'card' (kart) yapısında gösterelim
+        <div class="row">
+            @foreach (var kayit in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">@kayit.Ders.Ad</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">@kayit.Ders.Aciklama</p>
+
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <strong>Öğretmen:</strong>
+                                    @kayit.Ders.Ogretmen.Ad @kayit.Ders.Ogretmen.Soyad
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-light">
+                            <a asp-controller="Ogrenci"
+                               asp-action="Odevler"
+                               asp-route-id="@kayit.DersId"
+                               class="btn btn-outline-primary w-100">
+                                Ödevleri Görüntüle
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

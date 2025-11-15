@@ -1,0 +1,92 @@
+﻿
+
+@model Homework_portal.Models.Teslim
+
+@{
+    ViewData["Title"] = "Teslim Detayı";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <a href="c:\users\legen\source\repos\homework-portal\homework-portal\areas\admin\views\teslim\detay.cshtml">c:\users\legen\source\repos\homework-portal\homework-portal\areas\admin\views\teslim\detay.cshtml</a>
+                <div class="card-header">
+                    <h3 class="mb-0">Teslim Detayı ve Not Verme</h3>
+                </div>
+
+                <form method="post" asp-action="Detay">
+
+                    <input asp-for="Id" type="hidden" />
+
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Teslim Bilgileri</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <strong>Öğrenci:</strong>
+                                        @Model.Ogrenci.Ad @Model.Ogrenci.Soyad
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Ders:</strong>
+                                        @Model.Odev.Ders.Ad
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Ödev:</strong>
+                                        @Model.Odev.Baslik
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Teslim Tarihi:</strong>
+                                        @Model.TeslimTarihi.ToString("dd MMMM yyyy, HH:mm")
+                                    </li>
+                                </ul>
+
+                                <h5 class="text-primary mt-4">Teslim Edilen Dosya</h5>
+                                @if (string.IsNullOrEmpty(Model.DosyaYolu))
+                                {
+                                    <div class="alert alert-danger">Öğrenci bir dosya yüklememiş!</div>
+                                }
+                                else
+                                {
+                                    <a href="@Model.DosyaYolu" target="_blank" class="btn btn-success" download>
+                                        <i class="bi bi-download"></i> Dosyayı İndir
+                                    </a>
+                                }
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Not Girişi</h5>
+                                <p class="text-muted">Ödeve 0-100 arasında bir not girin.</p>
+
+                                <div class="mb-3">
+                                    <label asp-for="Not" class="form-label">Not</label>
+                                    <input asp-for="Not" type="number" class="form-control form-control-lg" min="0" max="100" placeholder="Örn: 85" />
+                                    <span asp-validation-for="Not" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-save"></i> Notu Kaydet
+                        </button>
+                        <a asp-controller="Teslim" asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-lg"></i> Listeye Geri Dön
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        // Formdaki validasyon (doğrulama) hatalarını
+        // göstermek için bu partial view'ı ekliyoruz.
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

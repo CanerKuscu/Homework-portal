@@ -1,9 +1,13 @@
+// ---- GÜNCEL VE TAM KOD ----
+// Dosya Yolu: Homework-portal/Program.cs
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Homework_portal.Data;
 using Homework_portal.Models;
 using Homework_portal.Repository;
 using Homework_portal.Utility;
+using Homework_portal.Hubs; // 1. YENÝ: Hub'ý tanýtmak için bu satýrý ekleyin
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,13 +31,12 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// 4. GÜNCEL KISIM: Identity Cookie ayarlarý
-// Sisteme Giriþ (Login) sayfasýnýn yerini bildirir
+// 4. Identity Cookie ayarlarý
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Admin/Account/Login";
-    options.LogoutPath = "/Admin/Account/Logout"; // Logout adresini de belirtelim
-    options.AccessDeniedPath = "/Admin/Home/Index"; // Yetkisi yetmeyince Admin anasayfaya yönlendir
+    options.LogoutPath = "/Admin/Account/Logout";
+    options.AccessDeniedPath = "/Admin/Home/Index";
 });
 
 
@@ -46,6 +49,9 @@ builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// 7. YENÝ: SignalR servisini ekle
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -72,14 +78,18 @@ using (var scope = app.Services.CreateScope())
     dbInitializer.Initialize();
 }
 
-// 9. ROTALAR (Sýralama çok önemli)
+// 9. YENÝ: SignalR Hub Endpoint'ini (adresini) haritala
+//    Bu, rotalardan (MapControllerRoute) önce olmalý.
+app.MapHub<NotificationHub>("/notificationHub");
 
-// 9a. Admin Area Rotasý (Önce bu gelmeli)
+// 10. ROTALAR (Sýralama çok önemli)
+
+// 10a. Admin Area Rotasý (Önce bu gelmeli)
 app.MapControllerRoute(
     name: "AdminArea",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
-// 9b. Varsayýlan Rota (Sonra bu gelmeli)
+// 10b. Varsayýlan Rota (Sonra bu gelmeli)
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

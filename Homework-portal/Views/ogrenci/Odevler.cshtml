@@ -1,0 +1,105 @@
+﻿// ---- GÜNCEL KOD ----
+// Dosya Yolu: Homework-portal/Views/Ogrenci/Odevler.cshtml
+
+@model Homework_portal.Models.ViewModels.OdevlerVM
+
+@{
+    // Sayfa başlığını, Controller'dan gelen Ders'in Adı olarak ayarlıyoruz
+    ViewData["Title"] = Model.Ders.Ad + " - Ödevler";
+}
+
+<div class="container mt-4">
+
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h2 class="text-primary">@Model.Ders.Ad</h2>
+            <p class="lead">Dersine Ait Ödevler</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-controller="Ogrenci" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Derslerime Geri Dön
+            </a>
+        </div>
+    </div>
+    <hr />
+
+    @if (!Model.OdevListesi.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            Bu derse ait henüz bir ödev yüklenmemiş.
+        </div>
+    }
+    else
+    {
+        <table class="table table-hover shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Başlık</th>
+                    <th>Son Teslim Tarihi</th>
+                    <th>Durum</th>
+                    <th>Not</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var odev in Model.OdevListesi)
+                {
+                    // Controller'da doldurduğumuz 'OgrenciTeslimleri' listesini kontrol ediyoruz.
+                    // O anki ödevin ID'sine sahip bir teslim var mı?
+                    var teslim = Model.OgrenciTeslimleri.FirstOrDefault(t => t.OdevId == odev.Id);
+
+                    // Son teslim tarihi geçti mi?
+                    bool gecKaldin = odev.TeslimTarihi < DateTime.Now;
+
+                    <tr>
+                        <td>@odev.Baslik</td>
+                        <td>
+                            @odev.TeslimTarihi.ToString("dd MMMM yyyy, HH:mm")
+                            @if (gecKaldin && teslim == null)
+                            {
+                                <span class="badge bg-danger ms-2">Süre Doldu</span>
+                            }
+                        </td>
+
+                        @if (teslim != null)
+                        {
+                            // --- TESLİM EDİLMİŞ DURUM ---
+                            <td>
+                                <span class="badge bg-success">Teslim Edildi</span>
+                            </td>
+                            <td>
+                                @(teslim.Not.HasValue? teslim.Not.ToString() : "Bekleniyor")
+                            </td>
+                            <td>
+                                <a href="#" class="btn btn-secondary btn-sm disabled">Teslim Detayı</a>
+                            </td>
+                        }
+                        else
+                        {
+                            // --- TESLİM EDİLMEMİŞ DURUM ---
+                            <td>
+                                <span class="badge bg-warning text-dark">Teslim Edilmedi</span>
+                            </td>
+                            <td>-</td>
+                            <td>
+                                @if (gecKaldin)
+                                {
+                                    <span class="btn btn-danger btn-sm disabled">Süre Doldu</span>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Ogrenci"
+                                       asp-action="TeslimEt"
+                                       asp-route-id="@odev.Id"
+                                       class="btn btn-primary btn-sm">
+                                        Teslim Et
+                                    </a>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
