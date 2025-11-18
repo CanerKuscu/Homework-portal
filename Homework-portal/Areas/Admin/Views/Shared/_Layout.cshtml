@@ -1,193 +1,224 @@
-﻿// ---- GÜNCEL VE TAM KOD ----
-// Dosya Yolu: Homework-portal/Areas/Admin/Views/Shared/_Layout.cshtml
-
+﻿<!-- Admin Layout (notifications bottom right) -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Ödev Dağıtım Portalı Yönetim Paneli" />
-    <meta name="author" content="" />
-    <title>@ViewData["Title"] - Yönetim Paneli</title>
+    <meta name="description" content="Homework Portal Admin" />
+    <title>@ViewData["Title"] - Yönetim</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin@7.0.7/dist/css/styles.css" rel="stylesheet" />
-
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/sb-admin/css/styles.css" />
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
+    <style>
+        #live-notifications { position: fixed; bottom: 20px; right: 20px; z-index: 1080; width: 360px; }
+        #live-notifications .alert { box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15); margin-top: .5rem; }
+        /* Gizlemede geçişte kaymayı önlemek için */
+        #server-alerts[hidden] { display: none !important; }
+    </style>
 </head>
 <body class="sb-nav-fixed">
 
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-        <a class="navbar-brand ps-3" asp-area="Admin" asp-controller="Home" asp-action="Index">Yönetim Paneli</a>
-
-        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
-
-        <div class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-        </div>
-
-        <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+        <button class="btn btn-link btn-sm order-0 ms-2 me-2" id="sidebarToggle" aria-label="Menüyü Aç/Kapat">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="navbar-brand pe-2" asp-area="Admin" asp-controller="Home" asp-action="Index">Yönetim</a>
+        <ul class="navbar-nav ms-auto me-3 me-lg-4">
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-
+                <a class="nav-link dropdown-toggle d-flex align-items-center" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user fa-fw"></i>
+                </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="#!">Ayarlar (Yakında)</a></li>
+                    <li>
+                        <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile">
+                            <i class="fas fa-cog me-2"></i>Hesap Ayarları
+                        </a>
+                    </li>
                     <li><hr class="dropdown-divider" /></li>
                     <li>
                         <form class="d-inline" asp-area="Admin" asp-controller="Account" asp-action="Logout" method="post">
-
                             <button type="submit" class="dropdown-item">
                                 <i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
                             </button>
-
                         </form>
                     </li>
                 </ul>
-
             </li>
         </ul>
     </nav>
 
-    <div id="layoutSidenav">
+    <div id="live-notifications"></div>
 
+    <div id="layoutSidenav">
         <div id="layoutSidenav_nav">
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
-                    <div class="nav">
-                        <div class="sb-sidenav-menu-heading">Çekirdek</div>
+                    <div class="nav flex-column">
+                        <div class="sb-sidenav-menu-heading">GENEL</div>
                         <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">
-
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Anasayfa
+                            Gösterge Paneli
                         </a>
-
-
-                        <div class="sb-sidenav-menu-heading">Yönetim</div>
-
-                        <a class="nav-link" asp-area="Admin" asp-controller="Ders" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
-                            Dersler
-
+                        <div class="sb-sidenav-menu-heading">YÖNETİM</div>
+                        <a class="nav-link" asp-area="Admin" asp-controller="Course" asp-action="Index">
+                            <div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>Dersler
                         </a>
-
-                        <a class="nav-link" asp-area="Admin" asp-controller="Odev" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tasks"></i></div>
-                            Ödevler
-
+                        <a class="nav-link" asp-area="Admin" asp-controller="Assignment" asp-action="Index">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tasks"></i></div>Ödevler
                         </a>
-
-                        <a class="nav-link" asp-area="Admin" asp-controller="Teslim" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="bi bi-box-arrow-in-down"></i></div>
-                            Teslimler
+                        <a class="nav-link" asp-area="Admin" asp-controller="Submission" asp-action="Index">
+                            <div class="sb-nav-link-icon"><i class="bi bi-box-arrow-in-down"></i></div>Teslimler
                         </a>
-
-
-                        <a class="nav-link" asp-area="Admin" asp-controller="Account" asp-action="Register">
-                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-
-                            Kullanıcılar
+                        <a class="nav-link" asp-area="Admin" asp-controller="TeacherApproval" asp-action="Pending">
+                            <div class="sb-nav-link-icon"><i class="fas fa-user-check"></i></div>Öğretmen Onayı
+                        </a>
+                        <a class="nav-link" asp-area="Admin" asp-controller="Account" asp-action="Users">
+                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>Kullanıcılar
                         </a>
                     </div>
                 </div>
-
                 <div class="sb-sidenav-footer">
-
-                    <div class="small">Giriş yapan:</div>
+                    <div class="small">Olarak oturum açıldı:</div>
                     @if (User.Identity.IsAuthenticated)
                     {
                         @User.Identity.Name
                     }
-
                     else
                     {
-                        @:Ziyaretçi
+                        @:Misafir
                     }
                 </div>
-
-
             </nav>
         </div>
 
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
+                    <div id="server-alerts">
+                        @if (TempData["admin_success"] != null)
+                        {
+                            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                                @TempData["admin_success"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                            </div>
+                        }
+                        @if (TempData["admin_error"] != null)
+                        {
+                            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                                @TempData["admin_error"]
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+                            </div>
+                        }
+                    </div>
 
                     @RenderBody()
-
                 </div>
-
             </main>
-
             <footer class="py-4 bg-light mt-auto">
                 <div class="container-fluid px-4">
                     <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">&copy; 2025 - Ödev Dağıtım Portalı</div>
+                        <div class="text-muted">&copy; 2025 - Ödev Portalı</div>
                     </div>
                 </div>
             </footer>
         </div>
     </div>
 
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100">
-    </div>
-
-
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin@7.0.7/dist/js/scripts.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/sb-admin/js/scripts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
-        $(document).ready(function () {
-
-            // 1. Hub bağlantısını kur
-            // '/notificationHub' adresi Program.cs'te belirlediğimiz adresle aynı olmalı
-            var connection = new signalR.HubConnectionBuilder()
-                .withUrl("/notificationHub")
-                .build();
-
-            // 2. Sunucudan "ReceiveNotification" adında bir mesaj gelirse
-            //    (OgrenciController'da bu adı kullanmıştık)
-            connection.on("ReceiveNotification", function (title, message) {
-                // Ekrana bildirim (toast) göster
-                showNotification(title, message);
+        // Auto close alerts
+        setTimeout(() => {
+            document.querySelectorAll('#server-alerts .alert').forEach(el => {
+                try { new bootstrap.Alert(el).close(); } catch { }
             });
+        }, 4000);
 
-            // 3. Bağlantıyı başlat
-            connection.start().catch(function (err) {
-                return console.error(err.toString());
-            });
+        const STORAGE_KEY = 'portal_live_notifications';
+        const DISPLAY_WINDOW_MS = 15000;
 
-            // Bildirim (Toast) gösterme fonksiyonu
-            function showNotification(title, message) {
-                var toastHtml = `
-                    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-                        <div class="toast-header bg-success text-white">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong class="me-auto">${title}</strong>
-                            <small>Şimdi</small>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-                        </div>
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                    </div>`;
+        // Son eklenen aynı bildirim tekrar gösterilmesin
+        let lastNotificationSignature = '';
+        let hasLiveNotification = false;
 
-                // HTML'i konteynerin içine ekle
-                var toastContainer = $('.toast-container');
-                toastContainer.append(toastHtml);
-
-                // Bootstrap 5 Toast'ı bul ve göster
-                var newToast = toastContainer.children().last();
-                var toast = new bootstrap.Toast(newToast[0]);
-                toast.show();
+        function hideServerAlerts() {
+            const host = document.getElementById('server-alerts');
+            if (host && !host.hasAttribute('hidden')) {
+                host.setAttribute('hidden', '');
             }
-        });
+        }
+
+        function loadStoredNotifications() {
+            try {
+                const raw = sessionStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                const now = Date.now();
+                const arr = (JSON.parse(raw) || []).filter(n => now - (n.ts || 0) < DISPLAY_WINDOW_MS);
+                if (arr.length > 0) {
+                    hideServerAlerts();
+                    hasLiveNotification = true;
+                }
+                arr.forEach(n => addLiveNotification(n.title, n.message, false));
+                sessionStorage.removeItem(STORAGE_KEY);
+            } catch { }
+        }
+        function storeNotification(title, message) {
+            try {
+                const arr = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '[]');
+                arr.push({ title, message, ts: Date.now() });
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+            } catch { }
+        }
+
+        function addLiveNotification(title, message, autoClose = true) {
+            const host = document.getElementById('live-notifications');
+            if (!host) return;
+            const signature = title + '|' + message;
+            if (signature === lastNotificationSignature) {
+                return; // duplicate
+            }
+            lastNotificationSignature = signature;
+
+            // Canlı bildirim varsa üstteki sunucu alertlerini gizle
+            hideServerAlerts();
+            hasLiveNotification = true;
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'alert alert-info alert-dismissible fade show';
+            wrapper.role = 'alert';
+            wrapper.innerHTML = `<strong>${title}:</strong> ${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>`;
+            host.appendChild(wrapper);
+            if (autoClose) setTimeout(() => { try { new bootstrap.Alert(wrapper).close(); } catch { } }, 8000);
+        }
+
+        loadStoredNotifications();
+
+        (function initSignalR(){
+            if (window.signalRInitialized) return;
+            window.signalRInitialized = true;
+            try {
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl('/notificationHub')
+                    .withAutomaticReconnect()
+                    .build();
+
+                connection.on('ReceiveNotification', (title, message) => {
+                    storeNotification(title, message);
+                    addLiveNotification(title, message);
+                });
+
+                connection.start().catch(err => console.error('SignalR error:', err));
+            } catch(e) {
+                console.error('SignalR init failed:', e);
+            }
+        })();
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

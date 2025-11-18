@@ -1,0 +1,64 @@
+@model Homework_portal.Models.ViewModels.SubmissionVM
+
+@{
+    ViewData["Title"] = "Ödevi Teslim Et";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">@Model.Assignment!.Title</h5>
+                    <small class="text-white-50">Son Tarih: @Model.Assignment.DueDate.ToString("dd MMM yyyy, HH:mm")</small>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">@Model.Assignment.Description</p>
+
+                    @if (!string.IsNullOrEmpty(Model.Assignment.FilePath))
+                    {
+                        <div class="alert alert-info d-flex justify-content-between align-items-center">
+                            <span>Öðretmenin yüklediði dosya:</span>
+                            <div class="d-flex gap-2">
+                                <a href="@Model.Assignment.FilePath" class="btn btn-outline-success btn-sm" download="@(Model.Assignment.OriginalFileName ?? "odev")">
+                                    <i class="bi bi-download"></i> @(Model.Assignment.OriginalFileName ?? "Ýndir")
+                                </a>
+                                <a href="@Model.Assignment.FilePath" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-box-arrow-up-right"></i> Görüntüle
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <form method="post" asp-controller="Student" asp-action="Submit" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <input asp-for="Submission.AssignmentId" type="hidden" />
+
+                        <div class="mb-3">
+                            <label asp-for="File" class="form-label">Dosya</label>
+                            <input asp-for="File" class="form-control" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.zip,.rar" />
+                            <span asp-validation-for="File" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg"></i> Gönder
+                            </button>
+                            <a asp-action="Assignments" asp-route-id="@Model.Assignment.CourseId" class="btn btn-outline-secondary">
+                                Ýptal
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{<partial name="_ValidationScriptsPartial" />}
+}

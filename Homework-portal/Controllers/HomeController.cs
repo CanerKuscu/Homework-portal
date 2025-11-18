@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
 using Homework_portal.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Homework_portal.Controllers
 {
+    [Authorize] // Ziyaretçiler bu controller'ı göremez
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

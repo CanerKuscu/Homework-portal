@@ -1,0 +1,16 @@
+@model IEnumerable<Homework_portal.Models.Submission>
+@{
+    ViewData["Title"] = "Teslimler";
+}
+<div class="container mt-4">
+    <div class="row align-items-center mb-3">
+        <div class="col">
+            <h2 class="mb-0">Teslimler</h2>
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        Bu liste artýk ders -> ödev hiyerarþisine taþýndý. Lütfen önce bir ders seçin.
+        <a class="btn btn-sm btn-primary ms-2" asp-action="Index">Ders Seçimine Git</a>
+    </div>
+</div>

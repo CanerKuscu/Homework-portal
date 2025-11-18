@@ -1,0 +1,115 @@
+@using Homework_portal.Utility
+@model IEnumerable<Homework_portal.Models.ViewModels.UserRoleVM>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info mb-0">Kayýt bulunamadý.</div>
+}
+else
+{
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>Ad</th>
+            <th>Soyad</th>
+            <th>Öðrenci No</th>
+            <th>E-posta</th>
+            <th>Sýnýf</th>
+            <th>Þube</th>
+            <th>Mevcut Rol</th>
+            <th>Rol Deðiþtir</th>
+            <th>Sil</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var u in Model)
+        {
+            var fullName = $"{u.Ad} {u.Soyad}".Trim();
+            <tr>
+                <td>@u.Ad</td>
+                <td>@u.Soyad</td>
+                <td>@(string.IsNullOrWhiteSpace(u.OgrenciNo) ? "-" : u.OgrenciNo)</td>
+                <td>@u.Email</td>
+                <td>@(string.IsNullOrWhiteSpace(u.Sinif) ? "-" : u.Sinif)</td>
+                <td>@(string.IsNullOrWhiteSpace(u.Sube) ? "-" : u.Sube)</td>
+                <td>
+                    @if (string.IsNullOrWhiteSpace(u.CurrentRole))
+                    {
+                        <span class="badge bg-secondary">Yok</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-info text-dark">@u.CurrentRole</span>
+                    }
+                </td>
+                <td>
+                    <form asp-area="Admin" asp-controller="Account" asp-action="UpdateRole" method="post" class="d-flex">
+                        <input type="hidden" name="userId" value="@u.UserId" />
+                        <select name="newRole" class="form-select form-select-sm me-2">
+                            <option value="">-- Seçin --</option>
+                            @foreach (var r in u.AvailableRoles)
+                            {
+                                <option value="@r" selected="@(r == u.CurrentRole ? "selected" : null)">@r</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">Kaydet</button>
+                    </form>
+                </td>
+                <td>
+                    <form id="del-@u.UserId" asp-area="Admin" asp-controller="Account" asp-action="DeleteUser" method="post">
+                        <input type="hidden" name="userId" value="@u.UserId" />
+                        <button type="button" class="btn btn-sm btn-danger js-delete" data-form-id="del-@u.UserId" data-user="@fullName" @(u.CurrentRole==AppRoles.Role_Admin?"disabled":null)>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<script>
+    document.querySelectorAll('.js-delete').forEach(button => {
+        button.addEventListener('click', function () {
+            const formId = this.getAttribute('data-form-id');
+            const userName = this.getAttribute('data-user');
+            const form = document.getElementById(formId);
+
+            const modalHtml = `
+                <div class="modal fade" tabindex="-1" id="deleteConfirmModal">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Silme Onayý</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>${userName} kullanýcýsýný silmek istediðinize emin misiniz?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ýptal</button>
+                                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Sil</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            const modalElement = document.getElementById('deleteConfirmModal');
+            const modal = new bootstrap.Modal(modalElement);
+
+            document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+                form.submit();
+            });
+
+            modal.show();
+
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                modalElement.remove();
+            });
+        });
+    });
+</script>

@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Homework_portal.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Homework_portal.Models;
 
 namespace Homework_portal.Data
 {
@@ -11,43 +11,43 @@ namespace Homework_portal.Data
         {
         }
 
-        public DbSet<Ders> Dersler { get; set; }
-        public DbSet<Odev> Odevler { get; set; }
-        public DbSet<Teslim> Teslimler { get; set; }
-        public DbSet<DersKayit> DersKayitlari { get; set; }
+        public DbSet<Course> Dersler { get; set; } = null!;
+        public DbSet<Assignment> Odevler { get; set; } = null!;
+        public DbSet<Submission> Teslimler { get; set; } = null!;
+        public DbSet<CourseEnrollment> DersKayitlari { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Ders>()
-                .HasOne(d => d.Ogretmen)
-                .WithMany(u => u.VerdigiDersler)
-                .HasForeignKey(d => d.OgretmenId)
+            builder.Entity<Course>()
+                .HasOne(d => d.Teacher)
+                .WithMany(u => u.VerdigiDersler!)
+                .HasForeignKey(d => d.TeacherId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<DersKayit>()
-                .HasOne(dk => dk.Ogrenci)
-                .WithMany(u => u.AldigiDersler)
-                .HasForeignKey(dk => dk.OgrenciId)
+            builder.Entity<Assignment>()
+                .HasOne(o => o.Course)
+                .WithMany(d => d.Assignments!)
+                .HasForeignKey(o => o.CourseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CourseEnrollment>()
+                .HasOne(dk => dk.Course)
+                .WithMany(d => d.Enrollments)
+                .HasForeignKey(dk => dk.CourseId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<DersKayit>()
-                .HasOne(dk => dk.Ders)
-                .WithMany(d => d.Kayitlar)
-                .HasForeignKey(dk => dk.DersId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<Teslim>()
-                .HasOne(t => t.Ogrenci)
+            builder.Entity<Submission>()
+                .HasOne(t => t.Student)
                 .WithMany(u => u.Teslimler)
-                .HasForeignKey(t => t.OgrenciId)
+                .HasForeignKey(t => t.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            builder.Entity<Teslim>()
-                .HasOne(t => t.Odev)
-                .WithMany(o => o.Teslimler)
-                .HasForeignKey(t => t.OdevId)
+            builder.Entity<Submission>()
+                .HasOne(t => t.Assignment)
+                .WithMany(o => o.Submissions)
+                .HasForeignKey(t => t.AssignmentId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

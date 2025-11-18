@@ -1,0 +1,35 @@
+@model Homework_portal.Models.ViewModels.AdminCourseAssignmentsVM
+@{
+    ViewData["Title"] = $"{Model.Course.Name} - Ödevler";
+}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">@Model.Course.Name - Ödevler</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">Ders Seçimine Dön</a>
+    </div>
+
+    @if (!Model.Assignments.Any())
+    {
+        <div class="alert alert-info">Bu derste henüz ödev yok.</div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var a in Model.Assignments)
+            {
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>@a.Title</strong>
+                            <small class="text-muted ms-2">Son Tarih: @a.DueDate.ToString("dd MMM yyyy, HH:mm")</small>
+                        </div>
+                        <div class="btn-group">
+                            <a class="btn btn-sm btn-primary" asp-action="ForAssignment" asp-route-id="@a.Id">Teslim Edenler</a>
+                            <a class="btn btn-sm btn-outline-danger" asp-action="MissingForAssignment" asp-route-id="@a.Id">Teslim Etmeyenler</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

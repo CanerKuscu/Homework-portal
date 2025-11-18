@@ -1,0 +1,121 @@
+@model IEnumerable<Homework_portal.Models.Course>
+@{
+    ViewData["Title"] = "Course Management";
+}
+
+<div id="alert-placeholder"></div>
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Course Management</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item active">Courses</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-book-open me-1"></i>
+            Course List
+            <a asp-action="Upsert" class="btn btn-primary btn-sm float-end">
+                <i class="fas fa-plus me-1"></i> Add Course
+            </a>
+        </div>
+        <div class="card-body">
+            <table id="coursesTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Teacher</th>
+                        <th style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var course in Model)
+                    {
+                        <tr id="course-@course.Id">
+                            <td>@course.Name</td>
+                            <td>@course.Description</td>
+                            <td>@course.Teacher.Ad @course.Teacher.Soyad</td>
+                            <td>
+                                <a asp-action="Upsert" asp-route-id="@course.Id" class="btn btn-warning btn-sm" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-danger btn-sm btn-delete"
+                                        data-id="@course.Id"
+                                        data-name="@course.Name"
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong><span id="courseNameText"></span></strong>?
+                <br />
+                <small class="text-danger">This action cannot be undone!</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            let courseIdToDelete;
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+            $('.btn-delete').on('click', function () {
+                courseIdToDelete = $(this).data('id');
+                $('#courseNameText').text($(this).data('name'));
+            });
+
+            $('#confirmDeleteButton').on('click', function () {
+                $.ajax({
+                    url: '/Admin/Course/DeleteById',
+                    type: 'DELETE',
+                    data: { id: courseIdToDelete },
+                    success: function (data) {
+                        deleteModal.hide();
+                        if (data.success) {
+                            $('#course-' + courseIdToDelete).remove();
+                            showAlert('success', data.message);
+                        } else {
+                            showAlert('danger', data.message);
+                        }
+                    },
+                    error: function () {
+                        deleteModal.hide();
+                        showAlert('danger', 'Server error. Please try again.');
+                    }
+                });
+            });
+
+            function showAlert(type, message) {
+                const placeholder = $('#alert-placeholder');
+                const wrapper = $('<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">'
+                    + message +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                placeholder.append(wrapper);
+                setTimeout(() => wrapper.alert('close'), 6000);
+            }
+        });
+    </script>
+}

@@ -1,11 +1,9 @@
-﻿
-
-<!DOCTYPE html>
-<html lang="en">
+﻿<!DOCTYPE html>
+<html lang="tr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Homework_portal</title>
+    <title>@ViewData["Title"] - Ödev Portalı</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Homework_portal.styles.css" asp-append-version="true" />
@@ -14,9 +12,9 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Homework_portal</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Ödev Portalı</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                        aria-expanded="false" aria-label="Menüyü Aç/Kapat">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
@@ -26,7 +24,7 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Anasayfa</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Gizlilik</a>
                         </li>
 
                         @if (User.Identity.IsAuthenticated)
@@ -34,7 +32,7 @@
                             @if (User.IsInRole(Homework_portal.Utility.AppRoles.Role_Ogrenci))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Ogrenci" asp-action="Index">Derslerim</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Student" asp-action="MyCourses">Derslerim</a>
                                 </li>
                             }
 
@@ -53,6 +51,30 @@
         </nav>
     </header>
     <div class="container">
+
+        <!-- TempData bildirimleri -->
+        @if (TempData["success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+            </div>
+        }
+        @if (TempData["error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+            </div>
+        }
+        @if (TempData["info"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                @TempData["info"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+            </div>
+        }
+
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -60,12 +82,22 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - Homework_portal - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - Ödev Portalı - <a asp-area="" asp-controller="Home" asp-action="Privacy">Gizlilik</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // Bildirimleri birkaç saniye sonra otomatik kapat
+        window.setTimeout(function () {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function (a) {
+                var alert = new bootstrap.Alert(a);
+                alert.close();
+            });
+        }, 3500);
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

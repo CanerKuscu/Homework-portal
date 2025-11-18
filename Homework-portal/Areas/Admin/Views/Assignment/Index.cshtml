@@ -1,0 +1,138 @@
+@model IEnumerable<Homework_portal.Models.Assignment>
+@{
+    ViewData["Title"] = "Ödevler";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Ödevler</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Gösterge Paneli</a></li>
+        <li class="breadcrumb-item active">Ödevler</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-tasks me-1"></i>
+            Ödevler
+            <a asp-action="Upsert" class="btn btn-primary btn-sm float-end">
+                <i class="fas fa-plus me-1"></i> Ödev Oluþtur
+            </a>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Baþlýk</th>
+                        <th>Ders</th>
+                        <th>Son Tarih</th>
+                        <th style="width:150px;">Ýþlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr id="odev-@item.Id">
+                        <td>@item.Title</td>
+                        <td>@item.Course?.Name</td>
+                        <td>@item.DueDate.ToString("dd MMMM yyyy, HH:mm")</td>
+                        <td>
+                            <a asp-action="Upsert" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Düzenle">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button"
+                                    class="btn btn-danger btn-sm btn-odev-delete"
+                                    data-id="@item.Id"
+                                    data-name="@item.Title"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal">
+                                <i class="fas fa-trash"></i> Sil
+                            </button>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Ödevi Sil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      </div>
+      <div class="modal-body">
+        <strong><span id="odevAdiText"></span></strong> ödevini silmek istediðinize emin misiniz?
+        <br />
+        <small class="text-danger">Bu iþlem geri alýnamaz!</small>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ýptal</button>
+        <button type="button" class="btn btn-danger" id="confirmOdevDeleteButton">Evet, Sil</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let odevIdToDelete;
+    let isDeleting = false;
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const nameSpan = document.getElementById('odevAdiText');
+    const confirmBtn = document.getElementById('confirmOdevDeleteButton');
+
+    document.querySelectorAll('.btn-odev-delete').forEach(btn => {
+        btn.addEventListener('click', () => {
+            odevIdToDelete = btn.getAttribute('data-id');
+            nameSpan.textContent = btn.getAttribute('data-name');
+        });
+    });
+
+    confirmBtn.addEventListener('click', () => {
+        if (isDeleting) return;
+        isDeleting = true;
+        confirmBtn.disabled = true;
+
+        fetch(`/Admin/Assignment/DeleteById?id=${odevIdToDelete}`, { method: 'DELETE' })
+            .then(r => r.json())
+            .then(data => {
+                deleteModal.hide();
+                if (data.success) {
+                    const row = document.getElementById('odev-' + odevIdToDelete);
+                    if (row) row.remove();
+                    pushToast('Ödev Silindi', data.message, 'success');
+                } else {
+                    pushToast('Hata', data.message || 'Ýþlem baþarýsýz.', 'danger');
+                }
+            })
+            .catch(() => {
+                deleteModal.hide();
+                pushToast('Hata', 'Sunucu hatasý oluþtu.', 'danger');
+            })
+            .finally(() => {
+                isDeleting = false;
+                confirmBtn.disabled = false;
+            });
+    });
+
+    function pushToast(title, message, type){
+        if (typeof addLiveNotification === 'function') {
+            addLiveNotification(title, message, true);
+        } else {
+            // Yedek: sayfaya küçük bir uyarý bas (5 sn)
+            const wrapper = document.createElement('div');
+            wrapper.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+            wrapper.style.zIndex = 1080;
+            wrapper.role = 'alert';
+            wrapper.innerHTML = `<strong>${title}:</strong> ${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+            document.body.appendChild(wrapper);
+            setTimeout(() => { try { new bootstrap.Alert(wrapper).close(); } catch {} }, 5000);
+        }
+    }
+});
+</script>
+}

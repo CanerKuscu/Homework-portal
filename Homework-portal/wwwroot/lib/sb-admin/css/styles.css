@@ -1,0 +1,31 @@
+/* Minimal SB Admin-like styles, local copy for offline use */
+:root{--sidenav-width:225px}
+body.sb-nav-fixed .sb-topnav{position:fixed;top:0;width:100%;z-index:1039}
+#layoutSidenav{display:flex}
+#layoutSidenav_nav{flex-basis:var(--sidenav-width);flex-shrink:0}
+#layoutSidenav_content{flex-grow:1;min-width:0}
+
+/* Fixed layout below navbar */
+body.sb-nav-fixed #layoutSidenav #layoutSidenav_nav{position:fixed;top:56px;left:0;width:var(--sidenav-width);height:calc(100% - 56px);z-index:1038}
+body.sb-nav-fixed #layoutSidenav #layoutSidenav_content{margin-left:var(--sidenav-width);padding-top:56px}
+
+/* Sidebar */
+.sb-sidenav{display:flex;flex-direction:column;height:100%;background-color:#212529;color:rgba(255,255,255,.5)}
+.sb-sidenav .sb-sidenav-menu{flex-grow:1;overflow-y:auto}
+.sb-sidenav .nav .sb-sidenav-menu-heading{padding:.75rem 1rem;font-size:.75rem;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase}
+.sb-sidenav .nav-link{display:flex;align-items:center;padding:.5rem 1rem;color:rgba(255,255,255,.55);text-decoration:none}
+.sb-sidenav .nav-link:hover,.sb-sidenav .nav-link.active{color:#fff;background:rgba(255,255,255,.05)}
+.sb-sidenav .sb-nav-link-icon{margin-right:.5rem}
+.sb-sidenav .sb-sidenav-footer{padding:.75rem 1rem;background:rgba(0,0,0,.2);color:rgba(255,255,255,.75)}
+
+/* Toggle behavior */
+body.sb-sidenav-toggled #layoutSidenav #layoutSidenav_nav{transform:translateX(calc(-1 * var(--sidenav-width)))}
+body.sb-sidenav-toggled #layoutSidenav #layoutSidenav_content{margin-left:0}
+body.sb-nav-fixed #layoutSidenav #layoutSidenav_nav{transition:transform .15s ease-in-out}
+
+/* Small screens start toggled by default */
+@media (max-width: 992px){
+  body.sb-nav-fixed #layoutSidenav #layoutSidenav_nav{transform:translateX(calc(-1 * var(--sidenav-width)))}
+  body.sb-nav-fixed #layoutSidenav #layoutSidenav_content{margin-left:0}
+  body.sb-nav-fixed:not(.sb-sidenav-toggled) #layoutSidenav #layoutSidenav_nav{transform:translateX(calc(-1 * var(--sidenav-width)))}
+}

@@ -1,0 +1,80 @@
+@model Homework_portal.Models.ViewModels.AssignmentsVM
+
+@{
+    ViewData["Title"] = Model.Course.Name + " - Ödevler";
+}
+
+<div class="container mt-4">
+
+    <div class="row mb-3 align-items-center">
+        <div class="col">
+            <h2 class="text-primary mb-0">@Model.Course.Name</h2>
+            <small class="text-muted">Bu dersin ödevleri</small>
+        </div>
+        <div class="col-auto">
+            <a asp-controller="Student" asp-action="MyCourses" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Derslere Dön
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Assignments.Any())
+    {
+        <div class="alert alert-info" role="alert">
+            Henüz hiçbir ödev yok.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle shadow-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Baþlýk</th>
+                        <th>Son Tarih</th>
+                        <th>Durum</th>
+                        <th>Not</th>
+                        <th style="width: 200px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Assignments)
+                    {
+                        var submission = Model.StudentSubmissions.FirstOrDefault(t => t.AssignmentId == a.Id);
+                        bool overdue = a.DueDate < DateTime.Now;
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">@a.Title</div>
+                            </td>
+                            <td>
+                                @a.DueDate.ToString("dd MMM yyyy, HH:mm")
+                                @if (overdue && submission == null)
+                                {
+                                    <span class="badge bg-danger ms-2">Süresi Doldu</span>
+                                }
+                            </td>
+                            @if (submission != null)
+                            {
+                                <td><span class="badge bg-success">Teslim Edildi</span></td>
+                                <td>@(submission.Grade.HasValue ? submission.Grade.ToString() : "Beklemede")</td>
+                                <td class="text-end">
+                                    <a href="@submission.FilePath" class="btn btn-outline-info btn-sm" download="@(submission.OriginalFileName ?? "teslim")">
+                                        <i class="bi bi-download"></i> Teslimi Ýndir
+                                    </a>
+                                </td>
+                            }
+                            else
+                            {
+                                <td><span class="badge bg-warning text-dark">Teslim Edilmedi</span></td>
+                                <td>-</td>
+                                <td>
+                                    <a asp-controller="Student" asp-action="Submit" asp-route-id="@a.Id" class="btn btn-primary btn-sm">Detay</a>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

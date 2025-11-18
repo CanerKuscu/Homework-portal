@@ -1,0 +1,49 @@
+@model IEnumerable<Homework_portal.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "Öðretmen Onaylarý";
+}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Öðretmen Onaylarý</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Anasayfa</a></li>
+        <li class="breadcrumb-item active">Öðretmen Onaylarý</li>
+    </ol>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Bekleyen öðretmen baþvurusu yok.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>E-posta</th>
+                        <th style="width: 220px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td>@u.Ad @u.Soyad</td>
+                        <td>@u.Email</td>
+                        <td class="text-end">
+                            <form asp-action="Approve" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button class="btn btn-success btn-sm" type="submit"><i class="bi bi-check"></i> Onayla</button>
+                            </form>
+                            <form asp-action="Reject" method="post" class="d-inline ms-1" onsubmit="return confirm('Baþvuruyu reddetmek istediðinize emin misiniz? Bu kullanýcý silinecek.');">
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <button class="btn btn-outline-danger btn-sm" type="submit"><i class="bi bi-x"></i> Reddet</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

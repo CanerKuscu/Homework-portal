@@ -1,0 +1,49 @@
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var isAdmin = User.IsInRole("Admin");
+}
+
+@if (isAdmin)
+{
+    <!-- Admin menüsü -->
+}
+@{
+    ViewData["Title"] = "Eriþim Reddedildi";
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Eriþim Reddedildi</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-3">
+                        Bu bölüme sadece <strong>Admin</strong> rolüne sahip kullanýcýlar eriþebilir.
+                    </p>
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        if (User.IsInRole(Homework_portal.Utility.AppRoles.Role_Admin) ||
+                            User.IsInRole(Homework_portal.Utility.AppRoles.Role_Ogretmen))
+                        {
+                            <a class="btn btn-primary" asp-area="Admin" asp-controller="Home" asp-action="Index">Yönetim Paneline Dön</a>
+                        }
+                        else if (User.IsInRole(Homework_portal.Utility.AppRoles.Role_Ogrenci))
+                        {
+                            <a class="btn btn-primary" asp-area="" asp-controller="Student" asp-action="MyCourses">Öðrenci Portalýna Dön</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary" asp-area="" asp-controller="Home" asp-action="Index">Anasayfaya Dön</a>
+                        }
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary" asp-area="Admin" asp-controller="Account" asp-action="Login">Giriþ Yap</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

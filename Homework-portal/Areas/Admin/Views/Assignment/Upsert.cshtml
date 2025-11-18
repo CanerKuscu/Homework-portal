@@ -1,0 +1,153 @@
+@model Homework_portal.Models.ViewModels.AssignmentVM
+
+@{
+    var title = Model.Assignment.Id != 0 ? "Ödevi Güncelle" : "Ödev Oluþtur";
+    ViewData["Title"] = title;
+}
+
+<style>
+    .collapse-toggle .arrow { transition: transform .3s ease; }
+    .collapse-toggle.collapsed .arrow { transform: rotate(0deg); }
+    .collapse-toggle:not(.collapsed) .arrow { transform: rotate(180deg); }
+</style>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h3 class="mb-0">@title</h3>
+                </div>
+                <div class="card-body">
+
+                    <form method="post" enctype="multipart/form-data">
+
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <input asp-for="Assignment.Id" type="hidden" />
+                        <!-- Mevcut dosya bilgileri kaybolmasýn -->
+                        <input asp-for="Assignment.FilePath" type="hidden" />
+                        <input asp-for="Assignment.OriginalFileName" type="hidden" />
+
+                        <div class="mb-3">
+                            <label asp-for="Assignment.CourseId" class="form-label">Ders</label>
+                            <select asp-for="Assignment.CourseId"
+                                    asp-items="@Model.CourseList"
+                                    class="form-select">
+                                <option disabled selected value="0">-- Ders Seçin --</option>
+                            </select>
+                            <span asp-validation-for="Assignment.CourseId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="border rounded">
+                                    <button class="btn btn-link w-100 text-start fw-semibold collapse-toggle collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sinifCollapse" aria-expanded="false" aria-controls="sinifCollapse">
+                                        <i class="fas fa-chevron-down arrow me-1"></i> Hedef Sýnýflar
+                                    </button>
+                                    <div class="collapse" id="sinifCollapse">
+                                        <div class="px-3 pb-3">
+                                            <div class="list-group small">
+                                                @foreach (var cls in Model.AllClasses ?? Enumerable.Empty<string>())
+                                                {
+                                                    var checkedClass = Model.SelectedClasses != null && Model.SelectedClasses.Contains(cls);
+                                                    <label class="list-group-item py-1 d-flex align-items-center">
+                                                        <input class="form-check-input me-2" type="checkbox" name="SelectedClasses" value="@cls" @(checkedClass ? "checked" : null) />
+                                                        <span>@cls. Sýnýf</span>
+                                                    </label>
+                                                }
+                                            </div>
+                                            <small class="text-muted d-block mt-2">Sadece ilk seçilen sýnýf kaydedilir.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="border rounded">
+                                    <button class="btn btn-link w-100 text-start fw-semibold collapse-toggle collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#subeCollapse" aria-expanded="false" aria-controls="subeCollapse">
+                                        <i class="fas fa-chevron-down arrow me-1"></i> Hedef Þubeler
+                                    </button>
+                                    <div class="collapse" id="subeCollapse">
+                                        <div class="px-3 pb-3">
+                                            <div class="list-group small overflow-auto" style="max-height: 260px;">
+                                                @foreach (var br in Model.AllBranches ?? Enumerable.Empty<string>())
+                                                {
+                                                    var checkedBranch = Model.SelectedBranches != null && Model.SelectedBranches.Contains(br);
+                                                    <label class="list-group-item py-1 d-flex align-items-center">
+                                                        <input class="form-check-input me-2" type="checkbox" name="SelectedBranches" value="@br" @(checkedBranch ? "checked" : null) />
+                                                        <span>@br Þube</span>
+                                                    </label>
+                                                }
+                                            </div>
+                                            <small class="text-muted d-block mt-2">Hiçbiri seçilmezse þube filtresi uygulanmaz.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Assignment.Title" class="form-label">Baþlýk</label>
+                            <input asp-for="Assignment.Title" class="form-control" />
+                            <span asp-validation-for="Assignment.Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Assignment.Description" class="form-label">Açýklama</label>
+                            <textarea asp-for="Assignment.Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Assignment.Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ödev Dosyasý (opsiyonel)</label>
+                            <input type="file" name="AssignmentFile" class="form-control" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.rar,.png,.jpg,.jpeg" />
+                            @if (!string.IsNullOrEmpty(Model.Assignment.FilePath))
+                            {
+                                <div class="mt-2">
+                                    <a href="@Model.Assignment.FilePath" download="@(Model.Assignment.OriginalFileName ?? "odev")" class="btn btn-outline-success btn-sm">
+                                        <i class="bi bi-download"></i> Mevcut Dosyayý Ýndir (@(Model.Assignment.OriginalFileName ?? "Dosya"))
+                                    </a>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Assignment.DueDate" class="form-label">Son Tarih</label>
+                            <input asp-for="Assignment.DueDate"
+                                   type="datetime-local"
+                                   class="form-control"
+                                   value="@Model.Assignment.DueDate.ToString("yyyy-MM-ddTHH:mm")" />
+                            <span asp-validation-for="Assignment.DueDate" class="text-danger"></span>
+                        </div>
+
+                        <div class="mt-4 d-flex gap-2">
+                            @if (Model.Assignment.Id != 0)
+                            {
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="bi bi-check-lg"></i> Güncelle
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg"></i> Oluþtur
+                                </button>
+                            }
+
+                            <a asp-controller="Assignment" asp-action="Index" class="btn btn-secondary">
+                                <i class="bi bi-x-lg"></i> Listeye Dön
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

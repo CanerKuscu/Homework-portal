@@ -12,6 +12,10 @@ namespace Homework_portal.Models.ViewModels
         [StringLength(50)]
         public string Soyad { get; set; }
 
+        // Opsiyonel: Öğrenci seçilirse zorunlu olacak
+        [Display(Name = "Öğrenci No")]
+        public string? OgrenciNo { get; set; }
+
         [Required(ErrorMessage = "E-posta adresi gereklidir.")]
         [EmailAddress]
         [Display(Name = "E-posta")]

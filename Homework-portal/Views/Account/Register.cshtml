@@ -1,56 +1,134 @@
 ﻿@using Homework_portal.Models.ViewModels
 @model RegisterVM
 @{
+    Layout = "~/Views/Shared/_PublicLayout.cshtml";
     ViewData["Title"] = "Kayıt Ol";
-    // Bu sayfa, ana (public) _Layout.cshtml şablonunu kullanacak
 }
 
 <div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <h1 class="text-center">@ViewData["Title"]</h1>
-        <h4 class="text-center text-muted">Ödev Portalı'na Hoş Geldiniz</h4>
-        <hr />
+    <div class="col-lg-8 col-xl-7">
+        <div class="card shadow-sm">
+            <div class="card-body p-4 p-md-5">
+                <h1 class="h3 text-center mb-1">@ViewData["Title"]</h1>
+                <p class="text-center text-muted mb-4">Ödev Portalı'na Hoş Geldiniz</p>
 
-        <form asp-action="Register" method="post">
+                <form asp-action="Register" method="post" novalidate>
+                    <input type="hidden" name="type" id="userType" value="student" />
 
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="btn-group w-100 mb-3" role="group" aria-label="Kayıt tipi">
+                        <input type="radio" class="btn-check" name="typeRadio" id="typeStudent" autocomplete="off"
+                            checked>
+                        <label class="btn btn-outline-primary" for="typeStudent"><i class="bi bi-mortarboard"></i>
+                            Öğrenci</label>
+                        <input type="radio" class="btn-check" name="typeRadio" id="typeTeacher" autocomplete="off">
+                        <label class="btn btn-outline-secondary" for="typeTeacher"><i class="bi bi-person-badge"></i>
+                            Öğretmen</label>
+                    </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label asp-for="Ad" class="form-label"></label>
-                    <input asp-for="Ad" class="form-control" />
-                    <span asp-validation-for="Ad" class="text-danger"></span>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label asp-for="Soyad" class="form-label"></label>
-                    <input asp-for="Soyad" class="form-control" />
-                    <span asp-validation-for="Soyad" class="text-danger"></span>
-                </div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Ad" class="form-label">Ad</label>
+                            <input asp-for="Ad" class="form-control" />
+                            <span asp-validation-for="Ad" class="invalid-feedback d-block"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Soyad" class="form-label">Soyad</label>
+                            <input asp-for="Soyad" class="form-control" />
+                            <span asp-validation-for="Soyad" class="invalid-feedback d-block"></span>
+                        </div>
+
+                        <div id="studentFields" class="col-12">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="OgrenciNo" class="form-label">Öğrenci No</label>
+                                    <input asp-for="OgrenciNo" class="form-control" placeholder="Örn: 2025-1234" />
+                                    <span asp-validation-for="OgrenciNo" class="invalid-feedback d-block"></span>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Sınıf</label>
+                                    <input name="Sinif" class="form-control" list="sinif-list" placeholder="Seçiniz" />
+                                    <datalist id="sinif-list">
+                                        <option value="1" />
+                                        <option value="2" />
+                                        <option value="3" />
+                                        <option value="4" />
+                                        <option value="5" />
+                                        <option value="6" />
+                                        <option value="7" />
+                                        <option value="8" />
+                                        <option value="9" />
+                                        <option value="10" />
+                                        <option value="11" />
+                                        <option value="12" />
+                                    </datalist>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Şube</label>
+                                    <input name="Sube" class="form-control" list="sube-list" placeholder="Seçiniz" />
+                                    <datalist id="sube-list">
+                                        <option value="A" />
+                                        <option value="B" />
+                                        <option value="C" />
+                                        <option value="D" />
+                                        <option value="E" />
+                                        <option value="F" />
+                                        <option value="G" />
+                                        <option value="H" />
+                                        <option value="I" />
+                                        <option value="İ" />
+                                        <option value="J" />
+                                        <option value="K" />
+                                        <option value="L" />
+                                        <option value="M" />
+                                        <option value="N" />
+                                        <option value="O" />
+                                        <option value="Ö" />
+                                        <option value="P" />
+                                        <option value="R" />
+                                        <option value="S" />
+                                        <option value="Ş" />
+                                        <option value="T" />
+                                        <option value="U" />
+                                        <option value="Ü" />
+                                        <option value="V" />
+                                        <option value="Y" />
+                                        <option value="Z" />
+                                    </datalist>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label">E-posta</label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="invalid-feedback d-block"></span>
+                        </div>
+                        <div class="col-md-6"></div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label">Şifre</label>
+                            <input asp-for="Password" class="form-control" />
+                            <span asp-validation-for="Password" class="invalid-feedback d-block"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConfirmPassword" class="form-label">Şifre (Tekrar)</label>
+                            <input asp-for="ConfirmPassword" class="form-control" />
+                            <span asp-validation-for="ConfirmPassword" class="invalid-feedback d-block"></span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-secondary small mt-3" id="teacherHint" style="display:none;">
+                        Öğretmen kaydı admin onayı gerektirir. Onaylanana kadar giriş yapamazsınız.
+                    </div>
+
+                    <div class="d-grid mt-3">
+                        <button class="btn btn-primary btn-lg" type="submit">Kayıt Ol</button>
+                    </div>
+                </form>
             </div>
-
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <input asp-for="ConfirmPassword" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-
-            <div class="d-grid gap-2">
-                <button class="btn btn-primary" type="submit">Kayıt Ol</button>
-            </div>
-
-        </form>
+        </div>
     </div>
 </div>
 
@@ -58,4 +136,28 @@
     @{
         <partial name="_ValidationScriptsPartial" />
     }
+    <script>
+        (function () {
+            const radioStudent = document.getElementById('typeStudent');
+            const radioTeacher = document.getElementById('typeTeacher');
+            const userType = document.getElementById('userType');
+            const studentFields = document.getElementById('studentFields');
+            const teacherHint = document.getElementById('teacherHint');
+
+            function sync() {
+                if (radioTeacher.checked) {
+                    userType.value = 'teacher';
+                    studentFields.style.display = 'none';
+                    teacherHint.style.display = '';
+                } else {
+                    userType.value = 'student';
+                    studentFields.style.display = '';
+                    teacherHint.style.display = 'none';
+                }
+            }
+            radioStudent.addEventListener('change', sync);
+            radioTeacher.addEventListener('change', sync);
+            sync();
+        })();
+    </script>
 }

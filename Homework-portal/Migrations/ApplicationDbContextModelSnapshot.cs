@@ -56,7 +56,7 @@ namespace Homework_portal.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<string>("NormalizedUserName")
+                    b.Property<string>(("NormalizedUserName"))
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -72,10 +72,18 @@ namespace Homework_portal.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Sinif")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
                     b.Property<string>("Soyad")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Sube")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -113,6 +121,10 @@ namespace Homework_portal.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Kod")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("OgretmenId")
                         .IsRequired()
@@ -370,7 +382,7 @@ namespace Homework_portal.Migrations
                     b.HasOne("Homework_portal.Models.ApplicationUser", "Ogrenci")
                         .WithMany("AldigiDersler")
                         .HasForeignKey("OgrenciId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Ders");

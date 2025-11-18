@@ -1,0 +1,70 @@
+@model Homework_portal.Models.ViewModels.CourseVM
+@{
+    ViewData["Title"] = Model.Course.Id == 0 ? "Ders Ekle" : "Dersi Düzenle";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">@ViewData["Title"]</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Gösterge Paneli</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Course" asp-action="Index">Dersler</a></li>
+        <li class="breadcrumb-item active">@ViewData["Title"]</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Ders Bilgileri</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="Upsert">
+                        <input type="hidden" asp-for="Course.Id" />
+
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <div class="mb-3">
+                            <label asp-for="Course.Name" class="form-label">Adý</label>
+                            <input asp-for="Course.Name" class="form-control" />
+                            <span asp-validation-for="Course.Name" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Course.Description" class="form-label">Açýklama</label>
+                            <textarea asp-for="Course.Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Course.Description" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Course.TeacherId" class="form-label">Öðretmen</label>
+                            <select asp-for="Course.TeacherId" asp-items="Model.TeacherList" class="form-select">
+                                <option value="">-- Öðretmen Seçin --</option>
+                            </select>
+                            <span asp-validation-for="Course.TeacherId" class="text-danger"></span>
+                        </div>
+
+                        <hr />
+                        @if (Model.Course.Id == 0)
+                        {
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i> Oluþtur
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Güncelle
+                            </button>
+                        }
+                        <a asp-action="Index" asp-controller="Course" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Listeye Dön
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

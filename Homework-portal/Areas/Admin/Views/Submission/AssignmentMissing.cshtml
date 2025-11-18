@@ -1,0 +1,51 @@
+@model IEnumerable<Homework_portal.Models.ApplicationUser>
+@{
+    var a = (Homework_portal.Models.Assignment)ViewBag.Assignment;
+    var q = ViewBag.Query as string;
+    ViewData["Title"] = $"{a.Course.Name} - {a.Title} - Teslim Etmeyenler";
+}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">@a.Course.Name • @a.Title - Teslim Etmeyenler</h2>
+        <a class="btn btn-outline-secondary btn-sm" asp-action="Course" asp-route-id="@a.CourseId">Ödevlere Dön</a>
+    </div>
+
+    <form method="get" class="row g-2 mb-3" asp-action="MissingForAssignment" asp-route-id="@a.Id">
+        <div class="col-md-4">
+            <input name="q" value="@q" class="form-control" placeholder="Öðrenci adý, soyadý veya numarasý" />
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" type="submit">Ara</button>
+            <a class="btn btn-outline-secondary" asp-action="MissingForAssignment" asp-route-id="@a.Id">Temizle</a>
+        </div>
+    </form>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-success">Tüm öðrenciler ödevi teslim etmiþ.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Öðrenci</th>
+                        <th>Öðrenci No</th>
+                        <th>Not</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.OrderBy(x => x.Ad).ThenBy(x => x.Soyad))
+                    {
+                        <tr>
+                            <td>@s.Ad @s.Soyad</td>
+                            <td>@(string.IsNullOrWhiteSpace(s.OgrenciNo) ? "-" : s.OgrenciNo)</td>
+                            <td><span class="badge bg-secondary">G (0)</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

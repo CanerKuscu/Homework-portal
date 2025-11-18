@@ -1,0 +1,44 @@
+@model Homework_portal.Models.Course
+@{
+    ViewData["Title"] = "Delete Course";
+}
+
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Delete Course</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Course" asp-action="Index">Courses</a></li>
+        <li class="breadcrumb-item active">Delete Course</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card bg-danger text-white">
+                <div class="card-header">
+                    <h4 class="card-title">ARE YOU SURE?</h4>
+                </div>
+                <div class="card-body">
+                    <p>You are about to permanently delete the following course:</p>
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Course Name</dt>
+                        <dd class="col-sm-9">@Model.Name</dd>
+                        <dt class="col-sm-3">Teacher</dt>
+                        <dd class="col-sm-9">@Model.Teacher.Ad @Model.Teacher.Soyad</dd>
+                    </dl>
+
+                    <form method="post" asp-action="Delete" asp-controller="Course">
+                        <input type="hidden" asp-for="Id" />
+
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> YES, DELETE
+                        </button>
+                        <a asp-action="Index" asp-controller="Course" class="btn btn-light">
+                            <i class="fas fa-arrow-left me-1"></i> NO, CANCEL
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

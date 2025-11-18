@@ -1,0 +1,66 @@
+// ---- GÜNCEL VE TAM KOD (OTOMATÝK KAPANAN) ----
+// Dosya Yolu: Homework-portal/Views/Shared/_TempAlerts.cshtml
+
+@{
+    var success = TempData["success"] as string;
+    var error = TempData["error"] as string;
+    var warning = TempData["warning"] as string;
+
+    // Script'in gereksiz yere yüklenmemesi için
+    // en az bir mesajýn var olup olmadýðýný kontrol edelim.
+    bool hasMessage = !string.IsNullOrEmpty(success) ||
+                      !string.IsNullOrEmpty(error) ||
+                      !string.IsNullOrEmpty(warning);
+}
+
+@if (!string.IsNullOrEmpty(success))
+{
+    <div class="alert alert-success alert-dismissible fade show temp-auto-hide mt-3" role="alert">
+        <strong>Baþarýlý!</strong> @success
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+    </div>
+}
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger alert-dismissible fade show temp-auto-hide mt-3" role="alert">
+        <strong>Hata!</strong> @error
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+    </div>
+}
+@if (!string.IsNullOrEmpty(warning))
+{
+    // 1. DÜZELTME: 'aria-label' yazým hatasý düzeltildi.
+    <div class="alert alert-warning alert-dismissible fade show temp-auto-hide mt-3" role="alert">
+        <strong>Uyarý!</strong> @warning
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>
+    </div>
+}
+
+
+@if (hasMessage)
+{
+    <script>
+        (function () {
+            // ms cinsinden süre (5000ms = 5 saniye)
+            const DISPLAY_MS = 5000;
+
+            // '.temp-auto-hide' sýnýfýna sahip tüm uyarýlarý bul
+            document.querySelectorAll('.temp-auto-hide').forEach(alertEl => {
+
+                // Belirlenen süre (DISPLAY_MS) sonunda
+                setTimeout(() => {
+                    try {
+                        // Bootstrap 5'in kendi alert kapatma fonksiyonunu bul
+                        const alert = bootstrap.Alert.getOrCreateInstance(alertEl);
+
+                        // Uyarýyý kapat (Bootstrap'in kendi fade animasyonu çalýþacak)
+                        alert.close();
+                    } catch (e) {
+                        // Hata olursa (örn: Bootstrap JS yüklenmemiþse) konsola yaz
+                        console.error("Bootstrap Alert close error:", e);
+                    }
+                }, DISPLAY_MS);
+            });
+        })();
+    </script>
+}

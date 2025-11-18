@@ -1,6 +1,4 @@
-﻿
-
-@using Microsoft.AspNetCore.Identity
+﻿@using Microsoft.AspNetCore.Identity
 @using Homework_portal.Models
 
 @inject SignInManager<ApplicationUser> SignInManager
@@ -9,20 +7,29 @@
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
-        <li class="nav-item">
-            <a class="nav-link text-dark" href="#" title="Manage">Merhaba @User.Identity?.Name!</a>
-        </li>
-        <li class="nav-item">
-            <form class="form-inline" asp-area="" asp-controller="Account" asp-action="Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
-                <button type="submit" class="nav-link btn btn-link text-dark">Çıkış Yap</button>
-            </form>
+        var user = await UserManager.GetUserAsync(User);
+        var displayName = user != null ? ($"{user.Ad} {user.Soyad}".Trim()) : User.Identity?.Name;
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="userDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Merhaba @displayName!</a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile">Hesabım</a></li>
+                <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="ChangePassword">Şifre Değiştir</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                    <form class="form-inline"
+                          asp-area="Admin"
+                          asp-controller="Account"
+                          asp-action="Logout"
+                          asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
+                          method="post">
+                        <button type="submit" class="dropdown-item">Çıkış Yap</button>
+                    </form>
+                </li>
+            </ul>
         </li>
     }
     else
     {
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Kayıt Ol</a>
-        </li>
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="Admin" asp-controller="Account" asp-action="Login">Giriş Yap</a>
         </li>

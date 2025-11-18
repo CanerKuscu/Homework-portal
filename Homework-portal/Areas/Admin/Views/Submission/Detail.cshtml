@@ -1,0 +1,92 @@
+@model Homework_portal.Models.Submission
+
+@{
+    ViewData["Title"] = "Teslim Detayý";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h3 class="mb-0">Teslim Detayý ve Not Verme</h3>
+                </div>
+
+                <form method="post" asp-action="Detail">
+
+                    <input asp-for="Id" type="hidden" />
+
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Teslim</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">
+                                        <strong>Öðrenci:</strong>
+                                        @Model.Student.Ad @Model.Student.Soyad
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Öðrenci No:</strong>
+                                        @(string.IsNullOrWhiteSpace(Model.Student.OgrenciNo) ? "-" : Model.Student.OgrenciNo)
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Ders:</strong>
+                                        @Model.Assignment.Course.Name
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Ödev:</strong>
+                                        @Model.Assignment.Title
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Teslim Zamaný:</strong>
+                                        @Model.SubmittedAt.ToString("dd MMMM yyyy, HH:mm")
+                                    </li>
+                                </ul>
+
+                                <h5 class="text-primary mt-4">Dosya</h5>
+                                @if (string.IsNullOrEmpty(Model.FilePath))
+                                {
+                                    <div class="alert alert-danger">Yüklenen dosya yok.</div>
+                                }
+                                else
+                                {
+                                    <div class="mb-2"><strong>Orijinal Dosya Adý:</strong> @(Model.OriginalFileName ?? "-")</div>
+                                    <a href="@Model.FilePath" target="_blank" class="btn btn-success" download="@(Model.OriginalFileName ?? "dosya")">
+                                        <i class="bi bi-download"></i> Ýndir (@(Model.OriginalFileName ?? "Dosya"))
+                                    </a>
+                                }
+                            </div>
+
+                            <div class="col-md-6">
+                                <h5 class="text-primary">Not</h5>
+                                <p class="text-muted">0 ile 100 arasýnda bir not giriniz.</p>
+
+                                <div class="mb-3">
+                                    <label asp-for="Grade" class="form-label">Not</label>
+                                    <input asp-for="Grade" type="number" class="form-control form-control-lg" min="0" max="100" placeholder="Örn. 85" />
+                                    <span asp-validation-for="Grade" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-save"></i> Kaydet
+                        </button>
+                        <a asp-controller="Submission" asp-action="Index" class="btn btn-secondary">
+                            <i class="bi bi-x-lg"></i> Listeye Dön
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

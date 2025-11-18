@@ -1,0 +1,100 @@
+@model IEnumerable<Homework_portal.Models.Course>
+@{
+    ViewData["Title"] = "Teslimler - Ders Seç";
+}
+
+<style>
+    /* Kart görünümünü biraz zenginleþtir */
+    .course-card { transition: transform .12s ease, box-shadow .12s ease; border: 0; }
+    .course-card:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); }
+    .course-chip { font-weight: 600; letter-spacing: .2px; }
+    .course-avatar { width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+    .stretched-link:hover { text-decoration: none; }
+</style>
+
+<div class="container mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+        <h2 class="mb-0">Teslimler - Ders Seç</h2>
+        <div class="input-group" style="max-width: 340px;">
+            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+            <input id="courseSearch" type="search" class="form-control" placeholder="Ders adý, kodu veya öðretmen" />
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Henüz ders yok.</div>
+    }
+    else
+    {
+        <div class="row g-3" id="courseGrid">
+            @foreach (var c in Model)
+            {
+                var teacherName = (c.Teacher != null) ? ($"{c.Teacher.Ad} {c.Teacher.Soyad}") : "";
+                var code = string.IsNullOrWhiteSpace(c.Code) ? null : c.Code?.Trim();
+                var description = !string.IsNullOrWhiteSpace(c.Description) && c.Description!.Length > 140
+                    ? c.Description.Substring(0, 137) + "..."
+                    : (c.Description ?? "Açýklama bulunmuyor.");
+                var initials = (c.Name?.Trim() ?? "?");
+                initials = initials.Length > 0 ? initials.Substring(0, 1).ToUpperInvariant() : "?";
+            <div class="col-12 col-md-6 col-lg-4 course-item" data-name="@c.Name" data-code="@code" data-teacher="@teacherName">
+                <div class="card course-card h-100 shadow-sm">
+                    <div class="card-body d-flex gap-3">
+                        <div class="course-avatar bg-primary text-white flex-shrink-0">
+                            @initials
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <h5 class="card-title mb-1 d-flex align-items-center gap-2">
+                                    <i class="bi bi-book"></i> @c.Name
+                                </h5>
+                                @if (!string.IsNullOrWhiteSpace(code))
+                                {
+                                    <span class="badge bg-secondary course-chip">@code</span>
+                                }
+                            </div>
+                            <div class="text-muted small mb-2">
+                                @if (!string.IsNullOrWhiteSpace(teacherName))
+                                {
+                                    <span><i class="bi bi-person-badge me-1"></i>@teacherName</span>
+                                }
+                            </div>
+                            <p class="card-text mb-3">@description</p>
+                            <a class="stretched-link" asp-action="Course" asp-route-id="@c.Id" aria-label="@c.Name dersinin ödevlerine git"></a>
+                            <div class="d-flex justify-content-end">
+                                <span class="text-primary small"><i class="bi bi-chevron-right"></i> Ödevlere git</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        <div id="noCourseResult" class="alert alert-warning d-none mt-3">
+            Aramanýzla eþleþen ders bulunamadý.
+        </div>
+    }
+</div>
+
+@section Scripts{
+<script>
+    (function(){
+        const input = document.getElementById('courseSearch');
+        const items = Array.from(document.querySelectorAll('#courseGrid .course-item'));
+        const empty = document.getElementById('noCourseResult');
+        if(!input || items.length === 0) return;
+        function norm(s){ return (s||'').toString().toLowerCase(); }
+        input.addEventListener('input', function(){
+            const q = norm(this.value);
+            let visible = 0;
+            items.forEach(el => {
+                const hay = norm(el.dataset.name) + ' ' + norm(el.dataset.code) + ' ' + norm(el.dataset.teacher);
+                const show = q.length === 0 || hay.includes(q);
+                el.classList.toggle('d-none', !show);
+                if(show) visible++;
+            });
+            if(empty){ empty.classList.toggle('d-none', visible !== 0); }
+        });
+    })();
+</script>
+}

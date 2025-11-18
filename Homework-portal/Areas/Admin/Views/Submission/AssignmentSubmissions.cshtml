@@ -1,0 +1,59 @@
+@model Homework_portal.Models.ViewModels.AdminAssignmentSubmissionsVM
+@{
+    ViewData["Title"] = $"{Model.Assignment.Course.Name} - {Model.Assignment.Title} - Teslim Edenler";
+    var q = ViewBag.Query as string;
+}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">@Model.Assignment.Course.Name • @Model.Assignment.Title</h2>
+        <div>
+            <a class="btn btn-outline-danger btn-sm" asp-action="MissingForAssignment" asp-route-id="@Model.Assignment.Id">Teslim Etmeyenleri Gör</a>
+            <a class="btn btn-outline-secondary btn-sm" asp-action="Course" asp-route-id="@Model.Assignment.CourseId">Ödevlere Dön</a>
+        </div>
+    </div>
+
+    <form method="get" class="row g-2 mb-3" asp-action="ForAssignment" asp-route-id="@Model.Assignment.Id">
+        <div class="col-md-4">
+            <input name="q" value="@q" class="form-control" placeholder="Öðrenci adý, soyadý veya numarasý" />
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" type="submit">Ara</button>
+            <a class="btn btn-outline-secondary" asp-action="ForAssignment" asp-route-id="@Model.Assignment.Id">Temizle</a>
+        </div>
+    </form>
+
+    @if (!Model.Submissions.Any())
+    {
+        <div class="alert alert-info">Henüz teslim bulunmuyor.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Öðrenci</th>
+                        <th>Öðrenci No</th>
+                        <th>Teslim Zamaný</th>
+                        <th>Not</th>
+                        <th style="width:150px"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Submissions)
+                    {
+                        <tr>
+                            <td>@s.Student.Ad @s.Student.Soyad</td>
+                            <td>@(string.IsNullOrWhiteSpace(s.Student.OgrenciNo) ? "-" : s.Student.OgrenciNo)</td>
+                            <td>@s.SubmittedAt.ToString("dd MMM yyyy, HH:mm")</td>
+                            <td>@(s.Grade.HasValue ? s.Grade.Value.ToString() : "-")</td>
+                            <td class="text-end">
+                                <a class="btn btn-info btn-sm" asp-action="Detail" asp-route-id="@s.Id">Ýncele / Not Ver</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,0 +1,40 @@
+@{
+    ViewData["Title"] = "Yetki Yok";
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">Yetkiniz Yok</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead mb-3">
+                        Bu sayfaya eriþim için gerekli yetkiye sahip deðilsiniz.
+                    </p>
+
+                    @if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        if (User.IsInRole(Homework_portal.Utility.AppRoles.Role_Admin) ||
+                            User.IsInRole(Homework_portal.Utility.AppRoles.Role_Ogretmen))
+                        {
+                            <a class="btn btn-primary" asp-area="Admin" asp-controller="Home" asp-action="Index">Yönetim Paneline Dön</a>
+                        }
+                        else if (User.IsInRole(Homework_portal.Utility.AppRoles.Role_Ogrenci))
+                        {
+                            <a class="btn btn-primary" asp-area="" asp-controller="Student" asp-action="MyCourses">Öðrenci Portalýna Dön</a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary" asp-area="" asp-controller="Home" asp-action="Index">Anasayfaya Dön</a>
+                        }
+                    }
+                    else
+                    {
+                        <a class="btn btn-primary" asp-area="Admin" asp-controller="Account" asp-action="Login">Giriþ Yap</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

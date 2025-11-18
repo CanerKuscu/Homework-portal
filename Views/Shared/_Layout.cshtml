@@ -1,0 +1,10 @@
+<body>
+    <div class="container-fluid mt-3">
+        @await Html.PartialAsync("_TempAlerts")
+    </div>
+
+    @RenderBody()
+
+    @RenderSection("Scripts", required: false)
+    @RenderSection("TempAlertScripts", required: false)
+</body>

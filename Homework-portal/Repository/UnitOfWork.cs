@@ -8,19 +8,19 @@ namespace Homework_portal.Repository
         private ApplicationDbContext _db;
 
         public IRepository<ApplicationUser> User { get; private set; }
-        public IRepository<Ders> Ders { get; private set; }
-        public IRepository<Odev> Odev { get; private set; }
-        public IRepository<Teslim> Teslim { get; private set; }
-        public IRepository<DersKayit> DersKayit { get; private set; }
+        public IRepository<Course> Course { get; private set; }
+        public IRepository<Assignment> Assignment { get; private set; }
+        public IRepository<Submission> Submission { get; private set; }
+        public IRepository<CourseEnrollment> CourseEnrollment { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;
             User = new Repository<ApplicationUser>(_db);
-            Ders = new Repository<Ders>(_db);
-            Odev = new Repository<Odev>(_db);
-            Teslim = new Repository<Teslim>(_db);
-            DersKayit = new Repository<DersKayit>(_db);
+            Course = new Repository<Course>(_db);
+            Assignment = new Repository<Assignment>(_db);
+            Submission = new Repository<Submission>(_db);
+            CourseEnrollment = new Repository<CourseEnrollment>(_db);
         }
 
         public void Dispose()

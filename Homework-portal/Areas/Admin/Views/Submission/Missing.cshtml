@@ -1,0 +1,60 @@
+@model Homework_portal.Models.ViewModels.SubmissionListsVM
+@{
+    ViewData["Title"] = "Teslim Etmeyenler";
+    var sinif = ViewBag.Sinif as string;
+    var sube = ViewBag.Sube as string;
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Teslim Etmeyenler</h2>
+
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-auto">
+            <input type="text" name="sinif" value="@sinif" class="form-control" placeholder="Sýnýf" />
+        </div>
+        <div class="col-auto">
+            <input type="text" name="sube" value="@sube" class="form-control" placeholder="Þube" />
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" type="submit">Filtrele</button>
+            <a asp-action="Missing" class="btn btn-outline-secondary">Temizle</a>
+        </div>
+    </form>
+
+    @if (!Model.NotSubmitted.Any())
+    {
+        <div class="alert alert-success">Seçilen filtrede teslim etmeyen öðrenci yok.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sýnýf</th>
+                        <th>Þube</th>
+                        <th>Ders</th>
+                        <th>Ödev</th>
+                        <th>Öðrenci</th>
+                        <th>Öðrenci No</th>
+                        <th>Not</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var ns in Model.NotSubmitted.OrderBy(x => x.Student.Sinif).ThenBy(x => x.Student.Sube))
+                {
+                    <tr>
+                        <td>@(ns.Student.Sinif ?? "-")</td>
+                        <td>@(ns.Student.Sube ?? "-")</td>
+                        <td>@ns.Assignment.Course.Name</td>
+                        <td>@ns.Assignment.Title</td>
+                        <td>@ns.Student.Ad @ns.Student.Soyad</td>
+                        <td>@(string.IsNullOrWhiteSpace(ns.Student.OgrenciNo) ? "-" : ns.Student.OgrenciNo)</td>
+                        <td><span class="badge bg-secondary">G (0)</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
