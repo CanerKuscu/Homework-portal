@@ -17,15 +17,31 @@
 
                     @if (!string.IsNullOrEmpty(Model.Assignment.FilePath))
                     {
-                        <div class="alert alert-info d-flex justify-content-between align-items-center">
-                            <span>Öðretmenin yüklediði dosya:</span>
-                            <div class="d-flex gap-2">
-                                <a href="@Model.Assignment.FilePath" class="btn btn-outline-success btn-sm" download="@(Model.Assignment.OriginalFileName ?? "odev")">
-                                    <i class="bi bi-download"></i> @(Model.Assignment.OriginalFileName ?? "Ýndir")
-                                </a>
-                                <a href="@Model.Assignment.FilePath" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
-                                    <i class="bi bi-box-arrow-up-right"></i> Görüntüle
-                                </a>
+                        var paths = Model.Assignment.FilePaths;
+                        var names = Model.Assignment.OriginalFileNames;
+
+                        <div class="alert alert-info">
+                            <strong class="d-block mb-2"><i class="bi bi-folder2-open"></i> Öðretmenin yüklediði dosyalar:</strong>
+                            <div class="list-group list-group-flush">
+                                @for (int i = 0; i < paths.Length; i++)
+                                {
+                                    var path = paths[i];
+                                    var name = i < names.Length ? names[i] : "Dosya " + (i + 1);
+                                    var shortName = name.Length > 40 ? name.Substring(0, 37) + "..." : name;
+                                    <div class="list-group-item bg-transparent border-0 px-0 py-1 d-flex justify-content-between align-items-center">
+                                        <span class="text-truncate me-2" style="max-width: 250px;" title="@name">
+                                            <i class="bi bi-file-earmark me-1"></i>@shortName
+                                        </span>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="@path" class="btn btn-outline-success" download="@name" title="Ýndir">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                            <a href="@path" target="_blank" rel="noopener" class="btn btn-outline-secondary" title="Görüntüle">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         </div>
                     }
@@ -38,9 +54,10 @@
                         <input asp-for="Submission.AssignmentId" type="hidden" />
 
                         <div class="mb-3">
-                            <label asp-for="File" class="form-label">Dosya</label>
-                            <input asp-for="File" class="form-control" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.zip,.rar" />
-                            <span asp-validation-for="File" class="text-danger"></span>
+                            <label asp-for="Files" class="form-label">Dosyalar</label>
+                            <input asp-for="Files" class="form-control" type="file" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.zip,.rar" />
+                            <small class="text-muted">Birden fazla dosya seçebilirsiniz (Ctrl tuþuna basýlý tutarak)</small>
+                            <span asp-validation-for="Files" class="text-danger d-block"></span>
                         </div>
 
                         <div class="d-flex gap-2">

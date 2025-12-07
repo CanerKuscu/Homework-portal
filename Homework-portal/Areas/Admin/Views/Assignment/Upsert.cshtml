@@ -99,14 +99,25 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Ödev Dosyasý (opsiyonel)</label>
-                            <input type="file" name="AssignmentFile" class="form-control" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.rar,.png,.jpg,.jpeg" />
+                            <label class="form-label">Ödev Dosyalarý (opsiyonel)</label>
+                            <input type="file" name="AssignmentFiles" class="form-control" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip,.rar,.png,.jpg,.jpeg" />
+                            <small class="text-muted">Birden fazla dosya seçebilirsiniz (Ctrl tuþuna basýlý tutarak)</small>
                             @if (!string.IsNullOrEmpty(Model.Assignment.FilePath))
                             {
                                 <div class="mt-2">
-                                    <a href="@Model.Assignment.FilePath" download="@(Model.Assignment.OriginalFileName ?? "odev")" class="btn btn-outline-success btn-sm">
-                                        <i class="bi bi-download"></i> Mevcut Dosyayý Ýndir (@(Model.Assignment.OriginalFileName ?? "Dosya"))
-                                    </a>
+                                    <strong class="d-block mb-1">Mevcut Dosyalar:</strong>
+                                    @{
+                                        var paths = Model.Assignment.FilePaths;
+                                        var names = Model.Assignment.OriginalFileNames;
+                                    }
+                                    @for (int i = 0; i < paths.Length; i++)
+                                    {
+                                        var path = paths[i];
+                                        var name = i < names.Length ? names[i] : "Dosya " + (i + 1);
+                                        <a href="@path" download="@name" class="btn btn-outline-success btn-sm me-1 mb-1">
+                                            <i class="bi bi-download"></i> @name
+                                        </a>
+                                    }
                                 </div>
                             }
                         </div>
@@ -116,6 +127,7 @@
                             <input asp-for="Assignment.DueDate"
                                    type="datetime-local"
                                    class="form-control"
+                                   min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")"
                                    value="@Model.Assignment.DueDate.ToString("yyyy-MM-ddTHH:mm")" />
                             <span asp-validation-for="Assignment.DueDate" class="text-danger"></span>
                         </div>

@@ -34,27 +34,59 @@ namespace Homework_portal.Controllers
                 return Challenge();
             }
 
+            var student = _unitOfWork.User.Get(u => u.Id == userId, tracked: true);
+
             var enrolledIds = _unitOfWork.CourseEnrollment
                 .GetAll(e => e.StudentId == userId, tracked: true)
                 .Select(e => e.CourseId)
                 .Distinct()
                 .ToList();
 
-            List<Course> myCourses;
+            List<Course> courses;
             if (enrolledIds.Any())
             {
-                myCourses = _unitOfWork.Course.GetAll(c => enrolledIds.Contains(c.Id), tracked: true).ToList();
+                courses = _unitOfWork.Course.GetAll(c => enrolledIds.Contains(c.Id), includeProperties: "Teacher", tracked: true).ToList();
             }
             else
             {
-                myCourses = _unitOfWork.Course.GetAll(tracked: true).ToList();
-                if (myCourses.Any())
+                courses = _unitOfWork.Course.GetAll(includeProperties: "Teacher", tracked: true).ToList();
+                if (courses.Any())
                 {
                     ViewBag.ShowAllCoursesInfo = true;
                 }
             }
 
-            return View(myCourses);
+            // Her ders için teslim edilmemiþ ödev sayýsýný hesapla
+            var result = new List<CourseWithPendingVM>();
+            
+            foreach (var course in courses)
+            {
+                // Bu derse ait ve öðrencinin sýnýf/þubesine uygun ödevleri al
+                var assignments = _unitOfWork.Assignment.GetAll(a => a.CourseId == course.Id
+                    && (string.IsNullOrEmpty(a.Class) || a.Class == student!.Sinif)
+                    && (string.IsNullOrEmpty(a.Branch) || a.Branch == student!.Sube),
+                    tracked: true
+                ).ToList();
+
+                var assignmentIds = assignments.Select(a => a.Id).ToHashSet();
+
+                // Öðrencinin bu dersteki teslimlerini al
+                var submittedAssignmentIds = _unitOfWork.Submission
+                    .GetAll(s => s.StudentId == userId && assignmentIds.Contains(s.AssignmentId), tracked: true)
+                    .Select(s => s.AssignmentId)
+                    .ToHashSet();
+
+                // Teslim edilmemiþ ödev sayýsý
+                var pendingCount = assignmentIds.Count - submittedAssignmentIds.Count;
+
+                result.Add(new CourseWithPendingVM
+                {
+                    Course = course,
+                    PendingAssignmentCount = pendingCount > 0 ? pendingCount : 0
+                });
+            }
+
+            return View(result);
         }
 
         [HttpGet("/Ogrenci/Odevler/{id:int}")]
@@ -137,9 +169,9 @@ namespace Homework_portal.Controllers
                 return NotFound();
             }
 
-            if (vm.File == null || vm.File.Length == 0)
+            if (vm.Files == null || vm.Files.Count == 0 || vm.Files.All(f => f.Length == 0))
             {
-                ModelState.AddModelError("File", "Lütfen bir dosya seçin.");
+                ModelState.AddModelError("Files", "Lütfen en az bir dosya seçin.");
             }
 
             if (!ModelState.IsValid)
@@ -148,19 +180,26 @@ namespace Homework_portal.Controllers
                 return View(vm);
             }
 
-            // Save uploaded file
+            // Save uploaded files
             var webRoot = _webHostEnvironment.WebRootPath;
             var uploadDir = Path.Combine(webRoot, "uploads", "submissions");
             if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
 
-            var uniqueName = Guid.NewGuid() + Path.GetExtension(vm.File!.FileName);
-            var physicalPath = Path.Combine(uploadDir, uniqueName);
-            using (var fs = new FileStream(physicalPath, FileMode.Create))
-            {
-                vm.File.CopyTo(fs);
-            }
+            var filePaths = new List<string>();
+            var originalNames = new List<string>();
 
-            var relativePath = Path.Combine("/uploads", "submissions", uniqueName).Replace("\\", "/");
+            foreach (var file in vm.Files!.Where(f => f.Length > 0))
+            {
+                var uniqueName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                var physicalPath = Path.Combine(uploadDir, uniqueName);
+                using (var fs = new FileStream(physicalPath, FileMode.Create))
+                {
+                    file.CopyTo(fs);
+                }
+                var relativePath = Path.Combine("/uploads", "submissions", uniqueName).Replace("\\", "/");
+                filePaths.Add(relativePath);
+                originalNames.Add(file.FileName);
+            }
 
             // Create or update submission
             var existing = _unitOfWork.Submission.Get(s => s.StudentId == userId && s.AssignmentId == vm.Submission.AssignmentId, tracked: true);
@@ -168,15 +207,15 @@ namespace Homework_portal.Controllers
             {
                 vm.Submission.StudentId = userId;
                 vm.Submission.SubmittedAt = DateTime.Now;
-                vm.Submission.FilePath = relativePath;
-                vm.Submission.OriginalFileName = vm.File.FileName;
+                vm.Submission.FilePath = string.Join(",", filePaths);
+                vm.Submission.OriginalFileName = string.Join(",", originalNames);
                 _unitOfWork.Submission.Add(vm.Submission);
             }
             else
             {
                 existing.SubmittedAt = DateTime.Now;
-                existing.FilePath = relativePath;
-                existing.OriginalFileName = vm.File.FileName;
+                existing.FilePath = string.Join(",", filePaths);
+                existing.OriginalFileName = string.Join(",", originalNames);
                 _unitOfWork.Submission.Update(existing);
             }
 

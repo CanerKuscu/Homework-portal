@@ -2,6 +2,7 @@
 using Homework_portal.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Homework_portal.Utility
 {
@@ -10,15 +11,18 @@ namespace Homework_portal.Utility
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _db;
+        private readonly IConfiguration _configuration;
 
         public DbInitializer(
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            ApplicationDbContext db)
+            ApplicationDbContext db,
+            IConfiguration configuration)
         {
             _roleManager = roleManager;
             _userManager = userManager;
             _db = db;
+            _configuration = configuration;
         }
 
         public void Initialize()
@@ -43,22 +47,28 @@ namespace Homework_portal.Utility
             EnsureRole(AppRoles.Role_Ogrenci);
             EnsureRole(AppRoles.Role_OgretmenAday);
 
+            // Admin bilgilerini configuration'dan oku
+            var adminEmail = _configuration["AdminSettings:Email"] ?? "admin@admin.com";
+            var adminPassword = _configuration["AdminSettings:Password"] ?? "Admin123*";
+            var adminFirstName = _configuration["AdminSettings:FirstName"] ?? "Admin";
+            var adminLastName = _configuration["AdminSettings:LastName"] ?? "User";
+
             var adminExists = _db.Users
                 .AsEnumerable()
-                .Any(u => string.Equals(u.Email, "admin@admin.com", StringComparison.OrdinalIgnoreCase)
+                .Any(u => string.Equals(u.Email, adminEmail, StringComparison.OrdinalIgnoreCase)
                        && _userManager.IsInRoleAsync(u, AppRoles.Role_Admin).GetAwaiter().GetResult());
             if (!adminExists)
             {
                 _userManager.CreateAsync(new ApplicationUser
                 {
-                    UserName = "admin@admin.com",
-                    Email = "admin@admin.com",
-                    FirstName = "Admin",
-                    LastName = "User",
+                    UserName = adminEmail,
+                    Email = adminEmail,
+                    FirstName = adminFirstName,
+                    LastName = adminLastName,
                     EmailConfirmed = true
-                }, "Admin123*").GetAwaiter().GetResult();
+                }, adminPassword).GetAwaiter().GetResult();
 
-                var user = _db.Users.FirstOrDefault(u => u.Email == "admin@admin.com");
+                var user = _db.Users.FirstOrDefault(u => u.Email == adminEmail);
                 if (user != null)
                 {
                     _userManager.AddToRoleAsync(user, AppRoles.Role_Admin).GetAwaiter().GetResult();

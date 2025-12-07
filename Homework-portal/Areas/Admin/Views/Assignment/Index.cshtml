@@ -104,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     const row = document.getElementById('odev-' + odevIdToDelete);
                     if (row) row.remove();
-                    pushToast('Ödev Silindi', data.message, 'success');
                 } else {
                     pushToast('Hata', data.message || 'Ýþlem baþarýsýz.', 'danger');
                 }

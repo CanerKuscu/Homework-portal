@@ -15,7 +15,14 @@
 
     <style>
         #live-notifications { position: fixed; bottom: 20px; right: 20px; z-index: 1080; width: 360px; }
-        #live-notifications .alert { box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15); margin-top: .5rem; }
+        #live-notifications .alert { 
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15); 
+            margin-top: .5rem;
+            transition: opacity 0.3s ease-out;
+        }
+        #live-notifications .alert.fade-out {
+            opacity: 0;
+        }
         /* Gizlemede geçişte kaymayı önlemek için */
         #server-alerts[hidden] { display: none !important; }
     </style>
@@ -70,11 +77,17 @@
                         <a class="nav-link" asp-area="Admin" asp-controller="Assignment" asp-action="Index">
                             <div class="sb-nav-link-icon"><i class="fas fa-tasks"></i></div>Ödevler
                         </a>
-                        <a class="nav-link" asp-area="Admin" asp-controller="Submission" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="bi bi-box-arrow-in-down"></i></div>Teslimler
+                        <a class="nav-link d-flex justify-content-between align-items-center" asp-area="Admin" asp-controller="Submission" asp-action="Index">
+                            <span>
+                                <div class="sb-nav-link-icon d-inline"><i class="bi bi-box-arrow-in-down"></i></div>Teslimler
+                            </span>
+                            <span id="badge-submissions" class="badge bg-danger rounded-pill" style="display:none;"></span>
                         </a>
-                        <a class="nav-link" asp-area="Admin" asp-controller="TeacherApproval" asp-action="Pending">
-                            <div class="sb-nav-link-icon"><i class="fas fa-user-check"></i></div>Öğretmen Onayı
+                        <a class="nav-link d-flex justify-content-between align-items-center" asp-area="Admin" asp-controller="TeacherApproval" asp-action="Pending">
+                            <span>
+                                <div class="sb-nav-link-icon d-inline"><i class="fas fa-user-check"></i></div>Öğretmen Onayı
+                            </span>
+                            <span id="badge-teachers" class="badge bg-warning text-dark rounded-pill" style="display:none;"></span>
                         </a>
                         <a class="nav-link" asp-area="Admin" asp-controller="Account" asp-action="Users">
                             <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>Kullanıcılar
@@ -165,7 +178,7 @@
                     hideServerAlerts();
                     hasLiveNotification = true;
                 }
-                arr.forEach(n => addLiveNotification(n.title, n.message, false));
+                arr.forEach(n => addLiveNotification(n.title, n.message));
                 sessionStorage.removeItem(STORAGE_KEY);
             } catch { }
         }
@@ -195,8 +208,48 @@
             wrapper.role = 'alert';
             wrapper.innerHTML = `<strong>${title}:</strong> ${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button>`;
             host.appendChild(wrapper);
-            if (autoClose) setTimeout(() => { try { new bootstrap.Alert(wrapper).close(); } catch { } }, 8000);
+            
+            // Her zaman otomatik kapat (5 saniye sonra)
+            setTimeout(function() {
+                wrapper.classList.add('fade-out');
+                setTimeout(function() {
+                    wrapper.remove();
+                }, 300);
+            }, 5000);
         }
+
+        // Badge sayılarını güncelle
+        function updateBadgeCounts() {
+            fetch('/Admin/Badge/GetCounts')
+                .then(r => r.json())
+                .then(data => {
+                    const subBadge = document.getElementById('badge-submissions');
+                    const teacherBadge = document.getElementById('badge-teachers');
+                    
+                    if (subBadge) {
+                        if (data.pendingSubmissions > 0) {
+                            subBadge.textContent = data.pendingSubmissions;
+                            subBadge.style.display = '';
+                        } else {
+                            subBadge.style.display = 'none';
+                        }
+                    }
+                    
+                    if (teacherBadge) {
+                        if (data.pendingTeachers > 0) {
+                            teacherBadge.textContent = data.pendingTeachers;
+                            teacherBadge.style.display = '';
+                        } else {
+                            teacherBadge.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(err => console.error('Badge update error:', err));
+        }
+
+        // Sayfa yüklendiğinde ve her 30 saniyede badge'leri güncelle
+        updateBadgeCounts();
+        setInterval(updateBadgeCounts, 30000);
 
         loadStoredNotifications();
 
@@ -212,6 +265,8 @@
                 connection.on('ReceiveNotification', (title, message) => {
                     storeNotification(title, message);
                     addLiveNotification(title, message);
+                    // Bildirim geldiğinde badge'leri hemen güncelle
+                    updateBadgeCounts();
                 });
 
                 connection.start().catch(err => console.error('SignalR error:', err));

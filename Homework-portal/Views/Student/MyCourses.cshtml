@@ -1,4 +1,4 @@
-@model IEnumerable<Homework_portal.Models.Course>
+@model IEnumerable<Homework_portal.Models.ViewModels.CourseWithPendingVM>
 @{
     ViewData["Title"] = "Derslerim";
 }
@@ -11,8 +11,6 @@
         </a>
     </div>
 
-    @* Banner tamamen kaldýrýldý *@
-
     @if (Model == null || !Model.Any())
     {
         <div class="alert alert-warning">Listelenecek ders bulunamadý.</div>
@@ -20,19 +18,44 @@
     else
     {
         <style>
-            .course-card { transition: transform .12s ease, box-shadow .12s ease; border: 0; }
+            .course-card { transition: transform .12s ease, box-shadow .12s ease; border: 0; position: relative; }
             .course-card:hover { transform: translateY(-2px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); }
-            .course-avatar { width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+            .course-avatar { width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; position: relative; }
+            .pending-badge { 
+                position: absolute; 
+                top: -5px; 
+                right: -5px; 
+                background: #dc3545; 
+                color: white; 
+                border-radius: 50%; 
+                width: 22px; 
+                height: 22px; 
+                font-size: 12px; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                font-weight: bold;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
         </style>
         <div class="row g-3">
-            @foreach (var c in Model)
+            @foreach (var item in Model)
             {
+                var c = item.Course;
                 var initials = (c.Name?.Trim() ?? "?");
                 initials = initials.Length > 0 ? initials.Substring(0, 1).ToUpperInvariant() : "?";
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="card course-card h-100 shadow-sm">
                         <div class="card-body d-flex gap-3">
-                            <div class="course-avatar bg-primary text-white">@initials</div>
+                            <div class="course-avatar bg-primary text-white">
+                                @initials
+                                @if (item.PendingAssignmentCount > 0)
+                                {
+                                    <span class="pending-badge" title="@item.PendingAssignmentCount teslim edilmemiþ ödev">
+                                        @item.PendingAssignmentCount
+                                    </span>
+                                }
+                            </div>
                             <div class="flex-grow-1">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
@@ -44,7 +67,7 @@
                                         }
                                     </div>
                                     <a class="stretched-link small text-decoration-none" asp-controller="Student" asp-action="Assignments" asp-route-id="@c.Id">
-                                        <i class="bi bi-chevron-right"></i> Ödeverle git
+                                        <i class="bi bi-chevron-right"></i> Ödevlere git
                                     </a>
                                 </div>
                                 @if (!string.IsNullOrWhiteSpace(c.Description))

@@ -19,19 +19,20 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 3. Identity (üyelik Sistemi) ekle
+// 3. Identity (Üyelik Sistemi) ekle
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
+    // Þifre politikasý: En az 1 rakam, 1 küçük harf, 1 büyük harf, 1 özel karakter
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 6;
-    // E?posta benzersiz olsun
+    // E-posta benzersiz olsun
     options.User.RequireUniqueEmail = true;
     // Türkçe karakterler ve @ iþareti vb. kullanýcý adýna izin ver
-    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+þÞýÝöÖçÇðÐüÜ";
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+çðýöþüÇÐÝÖÞÜ";
 })
     .AddErrorDescriber<TurkishIdentityErrorDescriber>()
     .AddEntityFrameworkStores<ApplicationDbContext>()

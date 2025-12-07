@@ -11,26 +11,26 @@ namespace Homework_portal.Utility
         public override IdentityError DuplicateEmail(string email)
             => new IdentityError { Code = nameof(DuplicateEmail), Description = $"Bu e-posta adresi zaten kayýtlý: {email}" };
 
-        public override IdentityError InvalidUserName(string userName)
+        public override IdentityError InvalidUserName(string? userName)
             => new IdentityError { Code = nameof(InvalidUserName), Description = "Geçersiz kullanýcý adý." };
 
-        public override IdentityError InvalidEmail(string email)
+        public override IdentityError InvalidEmail(string? email)
             => new IdentityError { Code = nameof(InvalidEmail), Description = "Geçersiz e-posta adresi." };
 
         public override IdentityError PasswordTooShort(int length)
             => new IdentityError { Code = nameof(PasswordTooShort), Description = $"Þifre en az {length} karakter olmalýdýr." };
 
         public override IdentityError PasswordRequiresNonAlphanumeric()
-            => new IdentityError { Code = nameof(PasswordRequiresNonAlphanumeric), Description = "Þifre en az bir alfasayýsal olmayan karakter içermelidir." };
+            => new IdentityError { Code = nameof(PasswordRequiresNonAlphanumeric), Description = "Þifre en az bir özel karakter içermelidir (örn: !@#$%^&*)." };
 
         public override IdentityError PasswordRequiresDigit()
-            => new IdentityError { Code = nameof(PasswordRequiresDigit), Description = "Þifre en az bir rakam içermelidir." };
+            => new IdentityError { Code = nameof(PasswordRequiresDigit), Description = "Þifre en az bir rakam içermelidir (0-9)." };
 
         public override IdentityError PasswordRequiresLower()
-            => new IdentityError { Code = nameof(PasswordRequiresLower), Description = "Þifre en az bir küçük harf içermelidir." };
+            => new IdentityError { Code = nameof(PasswordRequiresLower), Description = "Þifre en az bir küçük harf içermelidir (a-z)." };
 
         public override IdentityError PasswordRequiresUpper()
-            => new IdentityError { Code = nameof(PasswordRequiresUpper), Description = "Þifre en az bir büyük harf içermelidir." };
+            => new IdentityError { Code = nameof(PasswordRequiresUpper), Description = "Þifre en az bir büyük harf içermelidir (A-Z)." };
 
         public override IdentityError PasswordMismatch()
             => new IdentityError { Code = nameof(PasswordMismatch), Description = "Geçersiz þifre." };

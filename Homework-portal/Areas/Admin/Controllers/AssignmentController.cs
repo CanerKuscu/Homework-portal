@@ -99,7 +99,7 @@ namespace Homework_portal.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upsert(AssignmentVM vm)
         {
-            // Yetki: öðretmen yalnýzca kendi derslerine ödev verebilir
+            // Yetki: Öðretmen yalnýzca kendi derslerine ödev verebilir
             if (!IsAdmin && CurrentUserId != null)
             {
                 var ownsCourse = _unitOfWork.Course.Get(c => c.Id == vm.Assignment.CourseId)?.TeacherId == CurrentUserId;
@@ -143,22 +143,34 @@ namespace Homework_portal.Areas.Admin.Controllers
                 return View(vm);
             }
 
-            // Öðretmenin yüklediði dosyayý ModelState geçtikten sonra kaydet
-            var file = Request.Form.Files["AssignmentFile"]; 
-            if (file != null && file.Length > 0)
+            // Öðretmenin yüklediði dosyalarý ModelState geçtikten sonra kaydet (çoklu dosya)
+            var files = Request.Form.Files.GetFiles("AssignmentFiles");
+            if (files != null && files.Count > 0)
             {
                 var webRoot = _env.WebRootPath;
                 var uploadDir = Path.Combine(webRoot, "uploads", "assignments");
                 if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
 
-                var uniqueName = Guid.NewGuid() + Path.GetExtension(file.FileName);
-                var physicalPath = Path.Combine(uploadDir, uniqueName);
-                using (var fs = new FileStream(physicalPath, FileMode.Create))
+                var filePaths = new System.Collections.Generic.List<string>();
+                var originalNames = new System.Collections.Generic.List<string>();
+
+                foreach (var file in files.Where(f => f.Length > 0))
                 {
-                    await file.CopyToAsync(fs);
+                    var uniqueName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                    var physicalPath = Path.Combine(uploadDir, uniqueName);
+                    using (var fs = new FileStream(physicalPath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(fs);
+                    }
+                    filePaths.Add(Path.Combine("/uploads", "assignments", uniqueName).Replace("\\", "/"));
+                    originalNames.Add(file.FileName);
                 }
-                vm.Assignment.FilePath = Path.Combine("/uploads", "assignments", uniqueName).Replace("\\", "/");
-                vm.Assignment.OriginalFileName = file.FileName;
+
+                if (filePaths.Count > 0)
+                {
+                    vm.Assignment.FilePath = string.Join(",", filePaths);
+                    vm.Assignment.OriginalFileName = string.Join(",", originalNames);
+                }
             }
 
             var isNew = vm.Assignment.Id == 0;

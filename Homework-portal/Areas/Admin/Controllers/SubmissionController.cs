@@ -1,10 +1,12 @@
 using Homework_portal.Models;
+using Homework_portal.Models.ViewModels;
 using Homework_portal.Repository;
 using Homework_portal.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Security.Claims;
+using System.Collections.Generic;
 
 namespace Homework_portal.Areas.Admin.Controllers
 {
@@ -31,7 +33,29 @@ namespace Homework_portal.Areas.Admin.Controllers
             {
                 courses = courses.Where(c => c.TeacherId == CurrentUserId).ToList();
             }
-            return View("Courses", courses);
+
+            // Her ders için notlandýrýlmamýþ teslim sayýsýný hesapla
+            var result = new List<CourseWithPendingSubmissionsVM>();
+            
+            foreach (var course in courses)
+            {
+                var assignmentIds = _unitOfWork.Assignment
+                    .GetAll(a => a.CourseId == course.Id)
+                    .Select(a => a.Id)
+                    .ToHashSet();
+
+                var pendingCount = _unitOfWork.Submission
+                    .GetAll(s => assignmentIds.Contains(s.AssignmentId) && s.Grade == null)
+                    .Count();
+
+                result.Add(new CourseWithPendingSubmissionsVM
+                {
+                    Course = course,
+                    PendingSubmissionCount = pendingCount
+                });
+            }
+
+            return View("Courses", result);
         }
 
         // Seçilen kursun tüm ödevleri
