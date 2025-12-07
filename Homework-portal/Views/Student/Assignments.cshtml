@@ -18,6 +18,15 @@
         </div>
     </div>
 
+    @if (TempData["error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["error"]</div>
+    }
+    @if (TempData["success"] != null)
+    {
+        <div class="alert alert-success">@TempData["success"]</div>
+    }
+
     @if (!Model.Assignments.Any())
     {
         <div class="alert alert-info" role="alert">
@@ -34,14 +43,14 @@
                         <th>Son Tarih</th>
                         <th>Durum</th>
                         <th>Not</th>
-                        <th style="width: 200px;"></th>
+                        <th style="width: 300px;"></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var a in Model.Assignments)
                     {
                         var submission = Model.StudentSubmissions.FirstOrDefault(t => t.AssignmentId == a.Id);
-                        bool overdue = a.DueDate < DateTime.Now;
+                        bool overdue = a.DueDate.ToUniversalTime() < DateTime.UtcNow;
                         <tr>
                             <td>
                                 <div class="fw-semibold">@a.Title</div>
@@ -58,17 +67,25 @@
                                 <td><span class="badge bg-success">Teslim Edildi</span></td>
                                 <td>@(submission.Grade.HasValue ? submission.Grade.ToString() : "Beklemede")</td>
                                 <td class="text-end">
-                                    <a href="@submission.FilePath" class="btn btn-outline-info btn-sm" download="@(submission.OriginalFileName ?? "teslim")">
-                                        <i class="bi bi-download"></i> Teslimi Ýndir
-                                    </a>
+                                    @* Uploaded files are hidden here per request *@
+                                    <span class="text-muted">—</span>
                                 </td>
                             }
                             else
                             {
-                                <td><span class="badge bg-warning text-dark">Teslim Edilmedi</span></td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">Teslim Edilmedi</span>
+                                </td>
                                 <td>-</td>
                                 <td>
-                                    <a asp-controller="Student" asp-action="Submit" asp-route-id="@a.Id" class="btn btn-primary btn-sm">Detay</a>
+                                    @if (overdue)
+                                    {
+                                        <button class="btn btn-secondary btn-sm" disabled title="Teslim süresi dolmuþ; gönderim kapalý">Teslim Süresi Doldu</button>
+                                    }
+                                    else
+                                    {
+                                        <a asp-controller="Student" asp-action="Submit" asp-route-id="@a.Id" class="btn btn-primary btn-sm">Detay</a>
+                                    }
                                 </td>
                             }
                         </tr>

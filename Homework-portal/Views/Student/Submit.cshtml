@@ -1,77 +1,111 @@
 @model Homework_portal.Models.ViewModels.SubmissionVM
 
 @{
-    ViewData["Title"] = "Ödevi Teslim Et";
+    ViewData["Title"] = "Ödev Gönderimi";
 }
 
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">@Model.Assignment!.Title</h5>
-                    <small class="text-white-50">Son Tarih: @Model.Assignment.DueDate.ToString("dd MMM yyyy, HH:mm")</small>
+        <div class="col-md-10">
+
+            <div class="row mb-3">
+                <div class="col">
+                    <h2 class="mb-0">@Model.Assignment.Title</h2>
+                    <small class="text-muted">@Model.Assignment.Course.Name</small>
                 </div>
-                <div class="card-body">
-                    <p class="text-muted mb-3">@Model.Assignment.Description</p>
-
-                    @if (!string.IsNullOrEmpty(Model.Assignment.FilePath))
-                    {
-                        var paths = Model.Assignment.FilePaths;
-                        var names = Model.Assignment.OriginalFileNames;
-
-                        <div class="alert alert-info">
-                            <strong class="d-block mb-2"><i class="bi bi-folder2-open"></i> Öðretmenin yüklediði dosyalar:</strong>
-                            <div class="list-group list-group-flush">
-                                @for (int i = 0; i < paths.Length; i++)
-                                {
-                                    var path = paths[i];
-                                    var name = i < names.Length ? names[i] : "Dosya " + (i + 1);
-                                    var shortName = name.Length > 40 ? name.Substring(0, 37) + "..." : name;
-                                    <div class="list-group-item bg-transparent border-0 px-0 py-1 d-flex justify-content-between align-items-center">
-                                        <span class="text-truncate me-2" style="max-width: 250px;" title="@name">
-                                            <i class="bi bi-file-earmark me-1"></i>@shortName
-                                        </span>
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="@path" class="btn btn-outline-success" download="@name" title="Ýndir">
-                                                <i class="bi bi-download"></i>
-                                            </a>
-                                            <a href="@path" target="_blank" rel="noopener" class="btn btn-outline-secondary" title="Görüntüle">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    }
-
-                    <form method="post" asp-controller="Student" asp-action="Submit" asp-route-id="@Model.Assignment.Id" enctype="multipart/form-data">
-                        @Html.AntiForgeryToken()
-
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                        <input asp-for="Submission.AssignmentId" type="hidden" />
-
-                        <div class="mb-3">
-                            <label asp-for="Files" class="form-label">Dosyalar</label>
-                            <input asp-for="Files" class="form-control" type="file" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.zip,.rar" />
-                            <small class="text-muted">Birden fazla dosya seçebilirsiniz (Ctrl tuþuna basýlý tutarak)</small>
-                            <span asp-validation-for="Files" class="text-danger d-block"></span>
-                        </div>
-
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-lg"></i> Gönder
-                            </button>
-                            <a asp-action="Assignments" asp-route-id="@Model.Assignment.CourseId" class="btn btn-outline-secondary">
-                                Ýptal
-                            </a>
-                        </div>
-
-                    </form>
+                <div class="col-auto">
+                    <a asp-action="Assignments" asp-route-id="@Model.Assignment.CourseId" class="btn btn-outline-secondary">
+                        ? Ödevlere Dön
+                    </a>
                 </div>
             </div>
+
+            @* Use UTC-aware check so client/server times don't allow late submissions *@
+            @if (Model.Assignment.DueDate.ToUniversalTime() < DateTime.UtcNow)
+            {
+                <div class="alert alert-danger">
+                    Teslim süresi dolmuþ. Bu ödev artýk kabul edilmiyor.
+                </div>
+            }
+            else
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(Model.Assignment.FilePath))
+                        {
+                            <div class="mb-3">
+                                <h5>Öðretmen tarafýndan gönderilen dosyalar</h5>
+
+                                <div class="row g-2">
+                                    @{ 
+                                        var paths = Model.Assignment.FilePaths;
+                                        var names = Model.Assignment.OriginalFileNames;
+                                    }
+
+                                    @for (int i = 0; i < paths.Length; i++)
+                                    {
+                                        var path = paths[i];
+                                        var name = i < names.Length ? names[i] : System.IO.Path.GetFileName(path);
+                                        var ext = System.IO.Path.GetExtension(name)?.TrimStart('.').ToLowerInvariant() ?? "file";
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="card h-100 border-1">
+                                                <div class="card-body d-flex flex-column">
+                                                    <div class="d-flex align-items-start gap-2 mb-2">
+                                                        <div class="flex-shrink-0">
+                                                            <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                                                                <i class="bi bi-file-earmark-@((ext=="pdf")?"pdf":(ext=="doc"||ext=="docx")?"word":(ext=="ppt"||ext=="pptx")?"slides":(ext=="xls"||ext=="xlsx")?"excel":"text") text-secondary"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <div class="fw-semibold text-truncate" title="@name" style="max-width:100%;">@name</div>
+                                                            <small class="text-muted">.@ext</small>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mt-auto d-flex gap-2">
+                                                        <a href="@path" class="btn btn-outline-success btn-sm flex-fill" download="@name">
+                                                            <i class="bi bi-download"></i> Ýndir
+                                                        </a>
+                                                        <a href="@path" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm flex-fill">
+                                                            <i class="bi bi-eye"></i> Görüntüle
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+
+                            </div>
+                        }
+
+                        <form method="post" asp-controller="Student" asp-action="Submit" asp-route-id="@Model.Assignment.Id" enctype="multipart/form-data">
+                            @Html.AntiForgeryToken()
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                            <input asp-for="Submission.AssignmentId" type="hidden" />
+
+                            <div class="mb-3">
+                                <label asp-for="Files" class="form-label">Dosyalar</label>
+                                <input asp-for="Files" class="form-control" type="file" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg,.zip,.rar" />
+                                <small class="text-muted">Birden fazla dosya seçebilirsiniz (Ctrl tuþuna basýlý tutarak)</small>
+                                <span asp-validation-for="Files" class="text-danger d-block"></span>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg"></i> Gönder
+                                </button>
+                                <a asp-action="Assignments" asp-route-id="@Model.Assignment.CourseId" class="btn btn-outline-secondary">
+                                    Ýptal
+                                </a>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>

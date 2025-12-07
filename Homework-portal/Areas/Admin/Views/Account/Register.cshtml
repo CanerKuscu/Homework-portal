@@ -2,8 +2,7 @@
 @using Homework_portal.Utility
 @model RegisterVM
 @{
-    // Layout = null; SATIRINI SİLİYORUZ, ARTIK ADMİN PANELİNİ KULLANACAK
-    ViewData["Title"] = "Yeni Kullanıcı Oluştur"; // BAŞLIĞI DEĞİŞTİRDİK
+    ViewData["Title"] = "Yeni Kullanıcı Oluştur";
 }
 
 <div class="container-fluid px-4">
@@ -41,11 +40,23 @@
                         <div id="ogrenciFields" class="row" style="display:none;">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Sınıf</label>
-                                <input name="Sinif" class="form-control" />
+                                <select name="Sinif" class="form-select">
+                                    <option value="">-- Seçiniz --</option>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                </select>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Şube</label>
-                                <input name="Sube" class="form-control" />
+                                <select name="Sube" class="form-select">
+                                    <option value="">-- Seçiniz --</option>
+                                    @for (char c = 'A'; c <= 'Z'; c++)
+                                    {
+                                        <option value="@c">@c</option>
+                                    }
+                                </select>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label asp-for="OgrenciNo" class="form-label"></label>

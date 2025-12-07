@@ -3,6 +3,7 @@ using Homework_portal.Models.ViewModels;
 using Homework_portal.Repository;
 using Homework_portal.Utility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Security.Claims;
@@ -15,10 +16,12 @@ namespace Homework_portal.Areas.Admin.Controllers
     public class SubmissionController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public SubmissionController(IUnitOfWork unitOfWork)
+        public SubmissionController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
         }
 
         private bool IsAdmin => User.IsInRole(AppRoles.Role_Admin);
@@ -115,7 +118,7 @@ namespace Homework_portal.Areas.Admin.Controllers
 
         // Bir ödev için teslim etmeyenler listesi + arama
         [HttpGet]
-        public IActionResult MissingForAssignment(int id, string? q)
+        public async Task<IActionResult> MissingForAssignment(int id, string? q)
         {
             var assignment = _unitOfWork.Assignment.Get(a => a.Id == id, includeProperties: "Course", tracked: true);
             if (assignment == null) return NotFound();
@@ -124,13 +127,43 @@ namespace Homework_portal.Areas.Admin.Controllers
                 return Forbid();
             }
 
-            var enrolled = _unitOfWork.CourseEnrollment.GetAll(dk => dk.CourseId == assignment.CourseId, includeProperties: "Student", tracked: true)
+            // Teslim süresi doldu mu kontrolü
+            bool isDuePassed = assignment.DueDate <= DateTime.Now;
+            ViewBag.IsDuePassed = isDuePassed;
+
+            // Önce kursa kayýtlý öðrencileri al
+            var enrolledStudents = _unitOfWork.CourseEnrollment.GetAll(dk => dk.CourseId == assignment.CourseId, includeProperties: "Student", tracked: true)
                 .Select(dk => dk.Student)
                 .ToList();
 
-            var submittedIds = _unitOfWork.Submission.GetAll(s => s.AssignmentId == id, tracked: true).Select(s => s.StudentId).ToHashSet();
+            List<ApplicationUser> targetStudents;
 
-            var notSubmitted = enrolled.Where(s => !submittedIds.Contains(s.Id)).ToList();
+            // Eðer kursa kayýtlý öðrenci varsa, onlarý kullan
+            if (enrolledStudents.Any())
+            {
+                targetStudents = enrolledStudents;
+            }
+            else
+            {
+                // Kursa kayýtlý öðrenci yoksa, Öðrenci rolündeki tüm kullanýcýlarý al
+                var allStudents = await _userManager.GetUsersInRoleAsync(AppRoles.Role_Ogrenci);
+                targetStudents = allStudents.ToList();
+            }
+
+            var allStudentsCount = targetStudents.Count;
+
+            // Sýnýf ve þube filtresi (eðer ödevde belirtilmiþse)
+            if (!string.IsNullOrEmpty(assignment.Class))
+            {
+                targetStudents = targetStudents.Where(s => string.Equals(s.Class, assignment.Class, System.StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            if (!string.IsNullOrEmpty(assignment.Branch))
+            {
+                targetStudents = targetStudents.Where(s => string.Equals(s.Branch, assignment.Branch, System.StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            var submittedIds = _unitOfWork.Submission.GetAll(s => s.AssignmentId == id, tracked: true).Select(s => s.StudentId).ToHashSet();
+            var notSubmitted = targetStudents.Where(s => !submittedIds.Contains(s.Id)).ToList();
 
             if (!string.IsNullOrWhiteSpace(q))
             {
@@ -145,6 +178,18 @@ namespace Homework_portal.Areas.Admin.Controllers
 
             ViewBag.Assignment = assignment;
             ViewBag.Query = q;
+            // Debug bilgileri
+            ViewBag.TotalEnrolled = enrolledStudents.Count;
+            ViewBag.AllStudents = allStudentsCount;
+            ViewBag.FilteredEnrolled = targetStudents.Count;
+            ViewBag.SubmittedCount = submittedIds.Count;
+            ViewBag.NotSubmittedCount = notSubmitted.Count;
+            ViewBag.AssignmentClass = assignment.Class;
+            ViewBag.AssignmentBranch = assignment.Branch;
+
+            // Teslim süresi dolmadýysa boþ liste gönder
+            if (!isDuePassed)
+                return View("AssignmentMissing", new List<Homework_portal.Models.ApplicationUser>());
             return View("AssignmentMissing", notSubmitted);
         }
 

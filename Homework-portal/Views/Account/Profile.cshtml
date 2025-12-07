@@ -34,11 +34,25 @@
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Sinif" class="form-label"></label>
-                            <input asp-for="Sinif" class="form-control" />
+                            <select asp-for="Sinif" class="form-select">
+                                <option value="">-- Seçiniz --</option>
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    <option value="@i">@i</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Sinif" class="text-danger"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Sube" class="form-label"></label>
-                            <input asp-for="Sube" class="form-control" />
+                            <select asp-for="Sube" class="form-select">
+                                <option value="">-- Seçiniz --</option>
+                                @for (char c = 'A'; c <= 'Z'; c++)
+                                {
+                                    <option value="@c">@c</option>
+                                }
+                            </select>
+                            <span asp-validation-for="Sube" class="text-danger"></span>
                         </div>
                     </div>
                     <div class="mt-3 d-flex gap-2">

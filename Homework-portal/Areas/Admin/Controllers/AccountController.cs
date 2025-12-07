@@ -4,8 +4,8 @@ using Homework_portal.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using System.Linq; // eklendi LINQ için
-using Homework_portal.Repository; // eklendi: UnitOfWork kullanımı için
+using System.Linq;
+using Homework_portal.Repository;
 
 namespace Homework_portal.Areas.Admin.Controllers
 {
@@ -16,18 +16,18 @@ namespace Homework_portal.Areas.Admin.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IUnitOfWork _unitOfWork; // eklendi
+        private readonly IUnitOfWork _unitOfWork;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
-            IUnitOfWork unitOfWork) // eklendi
+            IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
-            _unitOfWork = unitOfWork; // eklendi
+            _unitOfWork = unitOfWork;
         }
 
         // --- GİRİŞ (LOGIN) - GET ---
@@ -279,6 +279,94 @@ namespace Homework_portal.Areas.Admin.Controllers
                 TempData["admin_error"] = string.Join("; ", result.Errors.Select(e => e.Description));
             }
             return RedirectToAction(nameof(Users));
+        }
+
+        // --- YENİ: KULLANICI DÜZENLE - GET ---
+        [HttpGet]
+        [Authorize(Roles = AppRoles.Role_Admin)]
+        public async Task<IActionResult> EditUser(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                TempData["admin_error"] = "Geçersiz kullanıcı.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                TempData["admin_error"] = "Kullanıcı bulunamadı.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var model = new EditUserVM
+            {
+                UserId = user.Id,
+                Ad = user.FirstName,
+                Soyad = user.LastName,
+                Email = user.Email ?? string.Empty,
+                OgrenciNo = user.StudentNumber,
+                Sinif = user.Class,
+                Sube = user.Branch,
+                CurrentRole = roles.FirstOrDefault() ?? string.Empty
+            };
+
+            return View(model);
+        }
+
+        // --- YENİ: KULLANICI DÜZENLE - POST ---
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = AppRoles.Role_Admin)]
+        public async Task<IActionResult> EditUser(EditUserVM model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByIdAsync(model.UserId);
+            if (user == null)
+            {
+                TempData["admin_error"] = "Kullanıcı bulunamadı.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            // Bilgileri güncelle
+            user.FirstName = model.Ad;
+            user.LastName = model.Soyad;
+            user.StudentNumber = model.OgrenciNo;
+            user.Class = model.Sinif;
+            user.Branch = model.Sube;
+
+            // E-posta değiştiyse UserName'i de güncelle
+            if (user.Email != model.Email)
+            {
+                var existingUser = await _userManager.FindByEmailAsync(model.Email);
+                if (existingUser != null && existingUser.Id != user.Id)
+                {
+                    ModelState.AddModelError("Email", "Bu e-posta adresi zaten kullanılıyor.");
+                    return View(model);
+                }
+                user.Email = model.Email;
+                user.UserName = model.Email;
+                user.NormalizedEmail = model.Email.ToUpperInvariant();
+                user.NormalizedUserName = model.Email.ToUpperInvariant();
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                TempData["admin_success"] = "Kullanıcı bilgileri güncellendi.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(model);
         }
     }
 }

@@ -142,6 +142,13 @@ namespace Homework_portal.Controllers
                 return NotFound();
             }
 
+            // Server-side: disallow opening submit page if due date passed (use UTC comparison)
+            if (assignment.DueDate.ToUniversalTime() < DateTime.UtcNow)
+            {
+                TempData["error"] = "Teslim süresi dolmuþ. Bu ödev artýk kabul edilmiyor.";
+                return RedirectToAction(nameof(Assignments), new { id = assignment.CourseId });
+            }
+
             var vm = new SubmissionVM
             {
                 Assignment = assignment,
@@ -167,6 +174,13 @@ namespace Homework_portal.Controllers
             if (assignment == null)
             {
                 return NotFound();
+            }
+
+            // Server-side: block POST if due date passed (UTC aware)
+            if (assignment.DueDate.ToUniversalTime() < DateTime.UtcNow)
+            {
+                TempData["error"] = "Teslim süresi dolmuþ. Teslim alýnmýyor.";
+                return RedirectToAction(nameof(Assignments), new { id = assignment.CourseId });
             }
 
             if (vm.Files == null || vm.Files.Count == 0 || vm.Files.All(f => f.Length == 0))

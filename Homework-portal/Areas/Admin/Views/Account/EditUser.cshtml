@@ -1,0 +1,101 @@
+@model Homework_portal.Models.ViewModels.EditUserVM
+@{
+    ViewData["Title"] = "Kullanýcý Düzenle";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Kullanýcý Düzenle</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="EditUser" method="post">
+                        <input type="hidden" asp-for="UserId" />
+                        <input type="hidden" asp-for="CurrentRole" />
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Ad" class="form-label"></label>
+                            <input asp-for="Ad" class="form-control" />
+                            <span asp-validation-for="Ad" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Soyad" class="form-label"></label>
+                            <input asp-for="Soyad" class="form-control" />
+                            <span asp-validation-for="Soyad" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="OgrenciNo" class="form-label"></label>
+                            <input asp-for="OgrenciNo" class="form-control" />
+                            <span asp-validation-for="OgrenciNo" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Sinif" class="form-label"></label>
+                                <select asp-for="Sinif" class="form-select" style="max-height: 200px;">
+                                    <option value="">-- Seçiniz --</option>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+                                        <option value="@i">@i</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Sinif" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Sube" class="form-label"></label>
+                                <select asp-for="Sube" class="form-select">
+                                    <option value="">-- Seçiniz --</option>
+                                    @for (char c = 'A'; c <= 'Z'; c++)
+                                    {
+                                        <option value="@c">@c</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Sube" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mevcut Rol</label>
+                            <input type="text" class="form-control" value="@Model.CurrentRole" disabled />
+                            <small class="text-muted">Rol deðiþtirmek için kullanýcýlar sayfasýndaki "Rol Deðiþtir" bölümünü kullanýn.</small>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Users" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Geri
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-lg me-1"></i>Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    select.form-select {
+        max-height: 38px;
+    }
+    select.form-select option {
+        padding: 5px;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
