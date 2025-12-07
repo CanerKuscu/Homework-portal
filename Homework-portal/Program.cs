@@ -109,18 +109,21 @@ app.MapHub<NotificationHub>("/notificationHub");
 
 // 10. ROTALAR
 
-// 10a. Admin Area Rotasý
+// 10a. Attribute-routed controller'larý etkinleþtir (Ogrenci/..., Student/... vb.)
+app.MapControllers();
+
+// 10b. Admin Area Rotasý
 app.MapControllerRoute(
     name: "AdminArea",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
-// 10b. KÖK ("/") ADRESÝNÝ her zaman Giriþ sayfasýna yönlendir (oturum açýk olsa bile)
+// 10c. KÖK ("/") ADRESÝNÝ her zaman Giriþ sayfasýna yönlendir (oturum açýk olsa bile)
 app.MapControllerRoute(
     name: "rootToLogin",
     pattern: string.Empty,
     defaults: new { area = "Admin", controller = "Account", action = "Login" });
 
-// 10c. Varsayýlan Rota
+// 10d. Varsayýlan Rota
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

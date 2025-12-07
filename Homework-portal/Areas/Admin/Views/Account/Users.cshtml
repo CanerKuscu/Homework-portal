@@ -4,7 +4,7 @@
     ViewData["Title"] = "Kullanýcýlar";
     var ogrenciler = Model.Where(m => string.Equals(m.CurrentRole, AppRoles.Role_Ogrenci, StringComparison.OrdinalIgnoreCase)).ToList();
     var ogretmenler = Model.Where(m => string.Equals(m.CurrentRole, AppRoles.Role_Ogretmen, StringComparison.OrdinalIgnoreCase)).ToList();
-    var digerleri = Model.Where(m => m.CurrentRole != AppRoles.Role_Ogrenci && m.CurrentRole != AppRoles.Role_Ogretmen).ToList();
+    var adminler = Model.Where(m => string.Equals(m.CurrentRole, AppRoles.Role_Admin, StringComparison.OrdinalIgnoreCase)).ToList();
 }
 <div class="container-fluid px-4">
     <h1 class="mt-4">Kullanýcýlar</h1>
@@ -37,17 +37,17 @@
         </div>
     </div>
 
-    @if (digerleri.Any())
+    @if (adminler.Any())
     {
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="fas fa-user-shield me-1"></i> Diðerleri</span>
+                <span><i class="fas fa-user-shield me-1"></i> Admin</span>
                 <a class="btn btn-sm btn-success" asp-area="Admin" asp-controller="Account" asp-action="Register">
                     <i class="fas fa-user-plus"></i> Yeni Kullanýcý
                 </a>
             </div>
             <div class="card-body">
-                @Html.Partial("_UsersTable", digerleri)
+                @Html.Partial("_UsersTable", adminler)
             </div>
         </div>
     }

@@ -30,7 +30,7 @@
                         </div>
                     }
 
-                    <form method="post" asp-controller="Student" asp-action="Submit" enctype="multipart/form-data">
+                    <form method="post" asp-controller="Student" asp-action="Submit" asp-route-id="@Model.Assignment.Id" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>

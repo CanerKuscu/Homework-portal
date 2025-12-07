@@ -57,7 +57,7 @@ namespace Homework_portal.Areas.Admin.Controllers
             if (looksLikeEmail)
                 user = await _userManager.FindByEmailAsync(id);
             else
-                user = _userManager.Users.FirstOrDefault(u => u.OgrenciNo == id);
+                user = _userManager.Users.FirstOrDefault(u => u.StudentNumber == id);
 
             if (user == null)
             {

@@ -4,6 +4,7 @@ using Homework_portal.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Homework_portal.Areas.Admin.Controllers
 {
@@ -18,11 +19,18 @@ namespace Homework_portal.Areas.Admin.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        // Yeni: Kurs seçimi ekraný (kurs -> ödevler -> teslimler)
+        private bool IsAdmin => User.IsInRole(AppRoles.Role_Admin);
+        private string? CurrentUserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // Kurs seçimi ekraný (kurs -> ödevler -> teslimler)
         [HttpGet]
         public IActionResult Index()
         {
             var courses = _unitOfWork.Course.GetAll(includeProperties: "Teacher").ToList();
+            if (!IsAdmin && CurrentUserId != null)
+            {
+                courses = courses.Where(c => c.TeacherId == CurrentUserId).ToList();
+            }
             return View("Courses", courses);
         }
 
@@ -32,6 +40,11 @@ namespace Homework_portal.Areas.Admin.Controllers
         {
             var course = _unitOfWork.Course.Get(c => c.Id == id, tracked: true);
             if (course == null) return NotFound();
+            if (!IsAdmin && CurrentUserId != null && course.TeacherId != CurrentUserId)
+            {
+                return Forbid();
+            }
+
             var v = new Models.ViewModels.AdminCourseAssignmentsVM
             {
                 Course = course,
@@ -46,6 +59,10 @@ namespace Homework_portal.Areas.Admin.Controllers
         {
             var assignment = _unitOfWork.Assignment.Get(a => a.Id == id, includeProperties: "Course", tracked: true);
             if (assignment == null) return NotFound();
+            if (!IsAdmin && CurrentUserId != null && assignment.Course.TeacherId != CurrentUserId)
+            {
+                return Forbid();
+            }
 
             var list = _unitOfWork.Submission
                 .GetAll(s => s.AssignmentId == id, includeProperties: "Student", tracked: true)
@@ -56,10 +73,10 @@ namespace Homework_portal.Areas.Admin.Controllers
             {
                 var term = q.Trim().ToLowerInvariant();
                 list = list.Where(s =>
-                        (!string.IsNullOrWhiteSpace(s.Student.Ad) && s.Student.Ad.ToLowerInvariant().Contains(term)) ||
-                        (!string.IsNullOrWhiteSpace(s.Student.Soyad) && s.Student.Soyad.ToLowerInvariant().Contains(term)) ||
-                        ($"{s.Student.Ad} {s.Student.Soyad}".ToLowerInvariant().Contains(term)) ||
-                        (!string.IsNullOrWhiteSpace(s.Student.OgrenciNo) && s.Student.OgrenciNo.ToLowerInvariant().Contains(term))
+                        (!string.IsNullOrWhiteSpace(s.Student.FirstName) && s.Student.FirstName.ToLowerInvariant().Contains(term)) ||
+                        (!string.IsNullOrWhiteSpace(s.Student.LastName) && s.Student.LastName.ToLowerInvariant().Contains(term)) ||
+                        ($"{s.Student.FirstName} {s.Student.LastName}".ToLowerInvariant().Contains(term)) ||
+                        (!string.IsNullOrWhiteSpace(s.Student.StudentNumber) && s.Student.StudentNumber.ToLowerInvariant().Contains(term))
                     ).ToList();
             }
 
@@ -78,6 +95,10 @@ namespace Homework_portal.Areas.Admin.Controllers
         {
             var assignment = _unitOfWork.Assignment.Get(a => a.Id == id, includeProperties: "Course", tracked: true);
             if (assignment == null) return NotFound();
+            if (!IsAdmin && CurrentUserId != null && assignment.Course.TeacherId != CurrentUserId)
+            {
+                return Forbid();
+            }
 
             var enrolled = _unitOfWork.CourseEnrollment.GetAll(dk => dk.CourseId == assignment.CourseId, includeProperties: "Student", tracked: true)
                 .Select(dk => dk.Student)
@@ -91,10 +112,10 @@ namespace Homework_portal.Areas.Admin.Controllers
             {
                 var term = q.Trim().ToLowerInvariant();
                 notSubmitted = notSubmitted.Where(s =>
-                        (!string.IsNullOrWhiteSpace(s.Ad) && s.Ad.ToLowerInvariant().Contains(term)) ||
-                        (!string.IsNullOrWhiteSpace(s.Soyad) && s.Soyad.ToLowerInvariant().Contains(term)) ||
-                        ($"{s.Ad} {s.Soyad}".ToLowerInvariant().Contains(term)) ||
-                        (!string.IsNullOrWhiteSpace(s.OgrenciNo) && s.OgrenciNo.ToLowerInvariant().Contains(term))
+                        (!string.IsNullOrWhiteSpace(s.FirstName) && s.FirstName.ToLowerInvariant().Contains(term)) ||
+                        (!string.IsNullOrWhiteSpace(s.LastName) && s.LastName.ToLowerInvariant().Contains(term)) ||
+                        ($"{s.FirstName} {s.LastName}".ToLowerInvariant().Contains(term)) ||
+                        (!string.IsNullOrWhiteSpace(s.StudentNumber) && s.StudentNumber.ToLowerInvariant().Contains(term))
                     ).ToList();
             }
 
@@ -109,6 +130,10 @@ namespace Homework_portal.Areas.Admin.Controllers
             var sub = _unitOfWork.Submission.Get(t => t.Id == id, includeProperties: "Student,Assignment,Assignment.Course");
             if (sub == null)
                 return NotFound();
+            if (!IsAdmin && CurrentUserId != null && sub.Assignment.Course.TeacherId != CurrentUserId)
+            {
+                return Forbid();
+            }
             return View(sub);
         }
 

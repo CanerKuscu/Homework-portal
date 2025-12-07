@@ -56,7 +56,7 @@ namespace Homework_portal.Controllers
                 // Öğrenci kaydında öğrenci no benzersiz olsun
                 if (!string.IsNullOrWhiteSpace(model.OgrenciNo))
                 {
-                    var existsStdNo = _userManager.Users.Any(u => u.OgrenciNo == model.OgrenciNo);
+                    var existsStdNo = _userManager.Users.Any(u => u.StudentNumber == model.OgrenciNo);
                     if (existsStdNo)
                     {
                         ModelState.AddModelError("OgrenciNo", "Bu öğrenci numarası zaten kayıtlı.");
@@ -70,11 +70,11 @@ namespace Homework_portal.Controllers
                 {
                     UserName = model.Email,
                     Email = model.Email,
-                    Ad = model.Ad,
-                    Soyad = model.Soyad,
-                    Sinif = isTeacher ? null : Sinif,
-                    Sube = isTeacher ? null : Sube,
-                    OgrenciNo = isTeacher ? null : model.OgrenciNo
+                    FirstName = model.Ad,
+                    LastName = model.Soyad,
+                    Class = isTeacher ? null : Sinif,
+                    Branch = isTeacher ? null : Sube,
+                    StudentNumber = isTeacher ? null : model.OgrenciNo
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -121,12 +121,12 @@ namespace Homework_portal.Controllers
 
             var vm = new ProfileVM
             {
-                Ad = user.Ad,
-                Soyad = user.Soyad,
+                Ad = user.FirstName,
+                Soyad = user.LastName,
                 Email = user.Email ?? string.Empty,
-                OgrenciNo = user.OgrenciNo,
-                Sinif = user.Sinif,
-                Sube = user.Sube
+                OgrenciNo = user.StudentNumber,
+                Sinif = user.Class,
+                Sube = user.Branch
             };
             return View(vm);
         }
@@ -146,11 +146,11 @@ namespace Homework_portal.Controllers
 
             // Öğrenci No benzersizliği (başka kullanıcıda var mı?)
             var newStdNo = string.IsNullOrWhiteSpace(model.OgrenciNo) ? null : model.OgrenciNo.Trim();
-            if (!string.Equals(newStdNo, user.OgrenciNo, System.StringComparison.Ordinal))
+            if (!string.Equals(newStdNo, user.StudentNumber, System.StringComparison.Ordinal))
             {
                 if (!string.IsNullOrWhiteSpace(newStdNo))
                 {
-                    var existsStdNo = _userManager.Users.Any(u => u.OgrenciNo == newStdNo && u.Id != user.Id);
+                    var existsStdNo = _userManager.Users.Any(u => u.StudentNumber == newStdNo && u.Id != user.Id);
                     if (existsStdNo)
                     {
                         ModelState.AddModelError("OgrenciNo", "Bu öğrenci numarası başka bir kullanıcıya ait.");
@@ -160,13 +160,13 @@ namespace Homework_portal.Controllers
             }
 
             // Koruyucu atamalar (boş gelirse mevcut değeri koru)
-            user.Ad = string.IsNullOrWhiteSpace(model.Ad) ? user.Ad : model.Ad.Trim();
-            user.Soyad = string.IsNullOrWhiteSpace(model.Soyad) ? user.Soyad : model.Soyad.Trim();
+            user.FirstName = string.IsNullOrWhiteSpace(model.Ad) ? user.FirstName : model.Ad.Trim();
+            user.LastName = string.IsNullOrWhiteSpace(model.Soyad) ? user.LastName : model.Soyad.Trim();
             user.Email = string.IsNullOrWhiteSpace(model.Email) ? user.Email : model.Email.Trim();
             user.UserName = user.Email; // login e‑posta ile
-            user.Sinif = string.IsNullOrWhiteSpace(model.Sinif) ? null : model.Sinif.Trim();
-            user.Sube = string.IsNullOrWhiteSpace(model.Sube) ? null : model.Sube.Trim();
-            user.OgrenciNo = newStdNo;
+            user.Class = string.IsNullOrWhiteSpace(model.Sinif) ? null : model.Sinif.Trim();
+            user.Branch = string.IsNullOrWhiteSpace(model.Sube) ? null : model.Sube.Trim();
+            user.StudentNumber = newStdNo;
 
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)

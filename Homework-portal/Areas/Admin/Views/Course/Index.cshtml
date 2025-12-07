@@ -1,33 +1,33 @@
 @model IEnumerable<Homework_portal.Models.Course>
 @{
-    ViewData["Title"] = "Course Management";
+    ViewData["Title"] = "Ders Yönetimi";
 }
 
 <div id="alert-placeholder"></div>
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Course Management</h1>
+    <h1 class="mt-4">Ders Yönetimi</h1>
     <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Dashboard</a></li>
-        <li class="breadcrumb-item active">Courses</li>
+        <li class="breadcrumb-item"><a asp-area="Admin" asp-controller="Home" asp-action="Index">Gösterge Paneli</a></li>
+        <li class="breadcrumb-item active">Dersler</li>
     </ol>
 
     <div class="card mb-4">
         <div class="card-header">
             <i class="fas fa-book-open me-1"></i>
-            Course List
+            Ders Listesi
             <a asp-action="Upsert" class="btn btn-primary btn-sm float-end">
-                <i class="fas fa-plus me-1"></i> Add Course
+                <i class="fas fa-plus me-1"></i> Ders Ekle
             </a>
         </div>
         <div class="card-body">
             <table id="coursesTable" class="table table-bordered table-striped">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Teacher</th>
-                        <th style="width: 150px;">Actions</th>
+                        <th>Adý</th>
+                        <th>Açýklama</th>
+                        <th>Öðretmen</th>
+                        <th style="width: 150px;">Ýþlemler</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -36,9 +36,9 @@
                         <tr id="course-@course.Id">
                             <td>@course.Name</td>
                             <td>@course.Description</td>
-                            <td>@course.Teacher.Ad @course.Teacher.Soyad</td>
+                            <td>@course.Teacher.FirstName @course.Teacher.LastName</td>
                             <td>
-                                <a asp-action="Upsert" asp-route-id="@course.Id" class="btn btn-warning btn-sm" title="Edit">
+                                <a asp-action="Upsert" asp-route-id="@course.Id" class="btn btn-warning btn-sm" title="Düzenle">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 <button type="button" class="btn btn-danger btn-sm btn-delete"
@@ -60,17 +60,17 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Delete Course</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title" id="deleteModalLabel">Dersi Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete <strong><span id="courseNameText"></span></strong>?
+                <strong><span id="courseNameText"></span></strong> dersini silmek istediðinize emin misiniz?
                 <br />
-                <small class="text-danger">This action cannot be undone!</small>
+                <small class="text-danger">Bu iþlem geri alýnamaz!</small>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Yes, Delete</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ýptal</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Evet, Sil</button>
             </div>
         </div>
     </div>
@@ -103,7 +103,7 @@
                     },
                     error: function () {
                         deleteModal.hide();
-                        showAlert('danger', 'Server error. Please try again.');
+                        showAlert('danger', 'Sunucu hatasý. Lütfen tekrar deneyin.');
                     }
                 });
             });
@@ -112,7 +112,7 @@
                 const placeholder = $('#alert-placeholder');
                 const wrapper = $('<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">'
                     + message +
-                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Kapat"></button></div>');
                 placeholder.append(wrapper);
                 setTimeout(() => wrapper.alert('close'), 6000);
             }

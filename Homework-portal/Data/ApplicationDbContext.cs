@@ -11,18 +11,24 @@ namespace Homework_portal.Data
         {
         }
 
-        public DbSet<Course> Dersler { get; set; } = null!;
-        public DbSet<Assignment> Odevler { get; set; } = null!;
-        public DbSet<Submission> Teslimler { get; set; } = null!;
-        public DbSet<CourseEnrollment> DersKayitlari { get; set; } = null!;
+        // English DbSet names
+        public DbSet<Course> Courses { get; set; } = null!;
+        public DbSet<Assignment> Assignments { get; set; } = null!;
+        public DbSet<Submission> Submissions { get; set; } = null!;
+        public DbSet<CourseEnrollment> CourseEnrollments { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<Course>().ToTable("Courses");
+            builder.Entity<Assignment>().ToTable("Assignments");
+            builder.Entity<Submission>().ToTable("Submissions");
+            builder.Entity<CourseEnrollment>().ToTable("CourseEnrollments");
+
             builder.Entity<Course>()
                 .HasOne(d => d.Teacher)
-                .WithMany(u => u.VerdigiDersler!)
+                .WithMany(u => u.TeachingCourses!)
                 .HasForeignKey(d => d.TeacherId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -40,7 +46,7 @@ namespace Homework_portal.Data
 
             builder.Entity<Submission>()
                 .HasOne(t => t.Student)
-                .WithMany(u => u.Teslimler)
+                .WithMany(u => u.Submissions)
                 .HasForeignKey(t => t.StudentId)
                 .OnDelete(DeleteBehavior.Restrict);
 

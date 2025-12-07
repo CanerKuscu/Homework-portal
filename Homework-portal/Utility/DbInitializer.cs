@@ -23,92 +23,26 @@ namespace Homework_portal.Utility
 
         public void Initialize()
         {
-            // 0a. AspNetUsers tablosu için Sinif/Sube/OgrenciNo sütunlarını garanti altına al
             try
             {
-                _db.Database.ExecuteSqlRaw(@"
-IF COL_LENGTH('dbo.AspNetUsers','Sinif') IS NULL
-    ALTER TABLE [dbo].[AspNetUsers] ADD [Sinif] NVARCHAR(10) NULL;
-IF COL_LENGTH('dbo.AspNetUsers','Sube') IS NULL
-    ALTER TABLE [dbo].[AspNetUsers] ADD [Sube] NVARCHAR(10) NULL;
-IF COL_LENGTH('dbo.AspNetUsers','OgrenciNo') IS NULL
-    ALTER TABLE [dbo].[AspNetUsers] ADD [OgrenciNo] NVARCHAR(30) NULL;
-IF (EXISTS(SELECT 1 FROM sys.columns WHERE Name = 'Ad' AND Object_ID = Object_ID('dbo.AspNetUsers')))
-BEGIN
-    ALTER TABLE [dbo].[AspNetUsers] ALTER COLUMN [Ad] NVARCHAR(50) NOT NULL;
-END
-IF (EXISTS(SELECT 1 FROM sys.columns WHERE Name = 'Soyad' AND Object_ID = Object_ID('dbo.AspNetUsers')))
-BEGIN
-    ALTER TABLE [dbo].[AspNetUsers] ALTER COLUMN [Soyad] NVARCHAR(50) NOT NULL;
-END
-");
-            }
-            catch { }
-
-            // 0b. Odevler tablosu için Sinif/Sube sütunlarını ve dosya alanlarını garanti altına al
-            try
-            {
-                _db.Database.ExecuteSqlRaw(@"
-IF COL_LENGTH('dbo.Odevler','Sinif') IS NULL
-    ALTER TABLE [dbo].[Odevler] ADD [Sinif] NVARCHAR(10) NULL;
-IF COL_LENGTH('dbo.Odevler','Sube') IS NULL
-    ALTER TABLE [dbo].[Odevler] ADD [Sube] NVARCHAR(10) NULL;
-IF COL_LENGTH('dbo.Odevler','DosyaYolu') IS NULL
-    ALTER TABLE [dbo].[Odevler] ADD [DosyaYolu] NVARCHAR(MAX) NULL;
-IF COL_LENGTH('dbo.Odevler','OrjinalDosyaAdi') IS NULL
-    ALTER TABLE [dbo].[Odevler] ADD [OrjinalDosyaAdi] NVARCHAR(MAX) NULL;
-");
-            }
-            catch { }
-
-            // 0c. Teslimler tablosu için dosya alanlarını garanti altına al
-            try
-            {
-                _db.Database.ExecuteSqlRaw(@"
-IF COL_LENGTH('dbo.Teslimler','DosyaYolu') IS NULL
-    ALTER TABLE [dbo].[Teslimler] ADD [DosyaYolu] NVARCHAR(MAX) NULL;
-IF COL_LENGTH('dbo.Teslimler','OrjinalDosyaAdi') IS NULL
-    ALTER TABLE [dbo].[Teslimler] ADD [OrjinalDosyaAdi] NVARCHAR(MAX) NULL;
-");
-            }
-            catch { }
-
-            // 1. Bekleyen migration'lar varsa çalıştır (Veritabanını güncelle)
-            try
-            {
-                if (_db.Database.GetPendingMigrations().Count() > 0)
+                // Do not drop DB. Apply migrations if any, else ensure created.
+                var pending = _db.Database.GetPendingMigrations();
+                if (pending.Any())
                 {
                     _db.Database.Migrate();
                 }
+                else
+                {
+                    _db.Database.EnsureCreated();
+                }
             }
-            catch (Exception)
-            {
-                // loglanabilir
-            }
+            catch { }
 
-            // 2. Roller: her run'da eksik rolleri tamamla
             EnsureRole(AppRoles.Role_Admin);
             EnsureRole(AppRoles.Role_Ogretmen);
             EnsureRole(AppRoles.Role_Ogrenci);
             EnsureRole(AppRoles.Role_OgretmenAday);
 
-            // admin@admin.com e-postası admin rolü için rezerve; başka kullanıcıda ise UserName değiştir.
-            var nonAdminWithAdminEmail = _db.Users
-                .AsEnumerable()
-                .Where(u => string.Equals(u.Email, "admin@admin.com", StringComparison.OrdinalIgnoreCase)
-                         && !_userManager.IsInRoleAsync(u, AppRoles.Role_Admin).GetAwaiter().GetResult())
-                .ToList();
-            foreach (var u in nonAdminWithAdminEmail)
-            {
-                if (u.UserName == u.Email)
-                {
-                    u.UserName = u.Email + ".user";
-                    _db.Update(u);
-                }
-            }
-            _db.SaveChanges();
-
-            // 3. Varsayılan admin yoksa oluştur
             var adminExists = _db.Users
                 .AsEnumerable()
                 .Any(u => string.Equals(u.Email, "admin@admin.com", StringComparison.OrdinalIgnoreCase)
@@ -119,8 +53,8 @@ IF COL_LENGTH('dbo.Teslimler','OrjinalDosyaAdi') IS NULL
                 {
                     UserName = "admin@admin.com",
                     Email = "admin@admin.com",
-                    Ad = "Admin",
-                    Soyad = "Kullanici",
+                    FirstName = "Admin",
+                    LastName = "User",
                     EmailConfirmed = true
                 }, "Admin123*").GetAwaiter().GetResult();
 

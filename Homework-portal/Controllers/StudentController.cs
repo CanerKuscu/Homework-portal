@@ -13,8 +13,6 @@ using System.Collections.Generic;
 namespace Homework_portal.Controllers
 {
     [Authorize(Roles = Utility.AppRoles.Role_Ogrenci)]
-    [Route("Ogrenci")]
-    [Route("Student")] // English alias
     public class StudentController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -26,8 +24,8 @@ namespace Homework_portal.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        [HttpGet("Derslerim")]
-        [HttpGet("MyCourses")]
+        [HttpGet("/Ogrenci/Derslerim")]
+        [HttpGet("/Student/MyCourses")] // English alias
         public IActionResult MyCourses()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -36,7 +34,6 @@ namespace Homework_portal.Controllers
                 return Challenge();
             }
 
-            // Önce kayýt olunan ders Id'lerini al (Course navigasyonuna güvenmeden)
             var enrolledIds = _unitOfWork.CourseEnrollment
                 .GetAll(e => e.StudentId == userId, tracked: true)
                 .Select(e => e.CourseId)
@@ -50,7 +47,6 @@ namespace Homework_portal.Controllers
             }
             else
             {
-                // Öðrencinin kaydý yoksa tüm mevcut dersleri göster ama sayfa içi bilgi ver
                 myCourses = _unitOfWork.Course.GetAll(tracked: true).ToList();
                 if (myCourses.Any())
                 {
@@ -61,8 +57,8 @@ namespace Homework_portal.Controllers
             return View(myCourses);
         }
 
-        [HttpGet("Odevler/{id:int}")]
-        [HttpGet("Assignments/{id:int}")]
+        [HttpGet("/Ogrenci/Odevler/{id:int}")]
+        [HttpGet("/Student/Assignments/{id:int}")] // English alias
         public IActionResult Assignments(int id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -97,6 +93,97 @@ namespace Homework_portal.Controllers
             return View(vm);
         }
 
-        // Submit GET/POST: unchanged
+        // Submit GET
+        [HttpGet("/Ogrenci/Submit/{id:int}")]
+        [HttpGet("/Student/Submit/{id:int}")] // English alias
+        public IActionResult Submit(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Challenge();
+            }
+
+            var assignment = _unitOfWork.Assignment.Get(a => a.Id == id, includeProperties: "Course", tracked: true);
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            var vm = new SubmissionVM
+            {
+                Assignment = assignment,
+                Submission = new Submission { AssignmentId = assignment.Id }
+            };
+
+            return View(vm);
+        }
+
+        // Submit POST
+        [HttpPost("/Ogrenci/Submit/{id:int}")]
+        [HttpPost("/Student/Submit/{id:int}")] // English alias
+        [ValidateAntiForgeryToken]
+        public IActionResult Submit(int id, SubmissionVM vm)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Challenge();
+            }
+
+            var assignment = _unitOfWork.Assignment.Get(a => a.Id == vm.Submission.AssignmentId, includeProperties: "Course", tracked: true);
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            if (vm.File == null || vm.File.Length == 0)
+            {
+                ModelState.AddModelError("File", "Lütfen bir dosya seçin.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                vm.Assignment = assignment;
+                return View(vm);
+            }
+
+            // Save uploaded file
+            var webRoot = _webHostEnvironment.WebRootPath;
+            var uploadDir = Path.Combine(webRoot, "uploads", "submissions");
+            if (!Directory.Exists(uploadDir)) Directory.CreateDirectory(uploadDir);
+
+            var uniqueName = Guid.NewGuid() + Path.GetExtension(vm.File!.FileName);
+            var physicalPath = Path.Combine(uploadDir, uniqueName);
+            using (var fs = new FileStream(physicalPath, FileMode.Create))
+            {
+                vm.File.CopyTo(fs);
+            }
+
+            var relativePath = Path.Combine("/uploads", "submissions", uniqueName).Replace("\\", "/");
+
+            // Create or update submission
+            var existing = _unitOfWork.Submission.Get(s => s.StudentId == userId && s.AssignmentId == vm.Submission.AssignmentId, tracked: true);
+            if (existing == null)
+            {
+                vm.Submission.StudentId = userId;
+                vm.Submission.SubmittedAt = DateTime.Now;
+                vm.Submission.FilePath = relativePath;
+                vm.Submission.OriginalFileName = vm.File.FileName;
+                _unitOfWork.Submission.Add(vm.Submission);
+            }
+            else
+            {
+                existing.SubmittedAt = DateTime.Now;
+                existing.FilePath = relativePath;
+                existing.OriginalFileName = vm.File.FileName;
+                _unitOfWork.Submission.Update(existing);
+            }
+
+            _unitOfWork.Save();
+
+            TempData["success"] = "Ödev baþarýlý þekilde teslim edildi.";
+            return RedirectToAction(nameof(Assignments), new { id = assignment.CourseId });
+        }
     }
 }
