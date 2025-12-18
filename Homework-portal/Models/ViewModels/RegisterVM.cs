@@ -33,6 +33,6 @@ namespace Homework_portal.Models.ViewModels
         public string ConfirmPassword { get; set; }
 
         [Required(ErrorMessage = "Rol seçimi gereklidir.")]
-        public string Role { get; set; } // Kullanıcı rolünü (Ogretmen, Ogrenci) tutacağız
+        public string Role { get; set; }
     }
 }

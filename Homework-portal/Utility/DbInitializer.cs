@@ -29,7 +29,7 @@ namespace Homework_portal.Utility
         {
             try
             {
-                // Do not drop DB. Apply migrations if any, else ensure created.
+                
                 var pending = _db.Database.GetPendingMigrations();
                 if (pending.Any())
                 {
@@ -47,7 +47,7 @@ namespace Homework_portal.Utility
             EnsureRole(AppRoles.Role_Ogrenci);
             EnsureRole(AppRoles.Role_OgretmenAday);
 
-            // Admin bilgilerini configuration'dan oku
+          
             var adminEmail = _configuration["AdminSettings:Email"] ?? "admin@admin.com";
             var adminPassword = _configuration["AdminSettings:Password"] ?? "Admin123*";
             var adminFirstName = _configuration["AdminSettings:FirstName"] ?? "Admin";

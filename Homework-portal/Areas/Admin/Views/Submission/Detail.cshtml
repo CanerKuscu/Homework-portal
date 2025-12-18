@@ -57,16 +57,24 @@
                                         @for (int i = 0; i < paths.Length; i++)
                                         {
                                             var path = paths[i];
-                                            var name = i < names.Length ? names[i] : "Dosya " + (i + 1);
-                                            var shortName = name.Length > 48 ? name.Substring(0, 45) + "..." : name;
+                                            var original = i < names.Length ? names[i] : "Dosya " + (i + 1);
+                                            // Use only the file name portion and normalize extension
+                                            var fileNameOnly = System.IO.Path.GetFileName(original ?? string.Empty) ?? string.Empty;
+                                            var baseName = System.IO.Path.GetFileNameWithoutExtension(fileNameOnly) ?? string.Empty;
+                                            var ext = System.IO.Path.GetExtension(fileNameOnly)?.ToLowerInvariant() ?? string.Empty;
+                                            var displayName = (baseName + ext).Trim();
+                                            var shortName = displayName.Length > 48 ? displayName.Substring(0, 45) + "..." : displayName;
+                                            // sanitize download attribute
+                                            var downloadName = displayName.Replace('"', '_').Replace('\'', '_');
+
                                             <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
                                                 <div class="me-2" style="min-width:0;">
-                                                    <span class="text-truncate d-inline-block" style="max-width:420px;" title="@name">
+                                                    <span class="text-truncate d-inline-block" style="max-width:420px;" title="@displayName">
                                                         <i class="bi bi-file-earmark me-1"></i>@shortName
                                                     </span>
                                                 </div>
                                                 <div class="btn-group btn-group-sm mt-2 mt-sm-0" role="group">
-                                                    <a href="@path" class="btn btn-success" download="@name" title="Ýndir">
+                                                    <a href="@path" class="btn btn-success" download="@downloadName" title="Ýndir">
                                                         <i class="bi bi-download"></i>
                                                     </a>
                                                     <a href="@path" target="_blank" rel="noopener" class="btn btn-outline-secondary" title="Görüntüle">

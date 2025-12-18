@@ -1,5 +1,4 @@
-﻿<!-- Admin Layout (notifications bottom right) -->
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
@@ -147,7 +146,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
-        // Auto close alerts
         setTimeout(() => {
             document.querySelectorAll('#server-alerts .alert').forEach(el => {
                 try { new bootstrap.Alert(el).close(); } catch { }
@@ -157,7 +155,7 @@
         const STORAGE_KEY = 'portal_live_notifications';
         const DISPLAY_WINDOW_MS = 15000;
 
-        // Son eklenen aynı bildirim tekrar gösterilmesin
+        
         let lastNotificationSignature = '';
         let hasLiveNotification = false;
 
@@ -199,7 +197,7 @@
             }
             lastNotificationSignature = signature;
 
-            // Canlı bildirim varsa üstteki sunucu alertlerini gizle
+            
             hideServerAlerts();
             hasLiveNotification = true;
 
@@ -265,7 +263,7 @@
                 connection.on('ReceiveNotification', (title, message) => {
                     storeNotification(title, message);
                     addLiveNotification(title, message);
-                    // Bildirim geldiğinde badge'leri hemen güncelle
+                    
                     updateBadgeCounts();
                 });
 

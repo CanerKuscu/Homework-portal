@@ -11,14 +11,10 @@ namespace Homework_portal.Models
 
         public DateTime SubmittedAt { get; set; }
         
-        /// <summary>
-        /// Birden fazla dosya yolu için virgülle ayrýlmýþ liste
-        /// </summary>
+        
         public string? FilePath { get; set; }
         
-        /// <summary>
-        /// Birden fazla orijinal dosya adý için virgülle ayrýlmýþ liste
-        /// </summary>
+       
         public string? OriginalFileName { get; set; }
         
         public int? Grade { get; set; }
@@ -35,7 +31,7 @@ namespace Homework_portal.Models
         [ValidateNever]
         public virtual ApplicationUser Student { get; set; } = null!;
 
-        // Helper properties for multiple files
+        
         [ValidateNever]
         public string[] FilePaths => string.IsNullOrEmpty(FilePath) ? Array.Empty<string>() : FilePath.Split(',', StringSplitOptions.RemoveEmptyEntries);
         

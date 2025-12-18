@@ -19,7 +19,7 @@ namespace Homework_portal.Repository
             DbSet = _db.Set<T>();
         }
 
-        // Synchronous methods (keep only if you actively use them; prefer async in web apps)
+        
         public void Add(T entity) => DbSet.Add(entity);
         public void AddRange(IEnumerable<T> entities) => DbSet.AddRange(entities);
         public void Remove(T entity) => DbSet.Remove(entity);

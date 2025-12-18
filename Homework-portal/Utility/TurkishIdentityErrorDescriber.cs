@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Homework_portal.Utility
 {
-    // Identity hata mesajlarýný Türkçeleþtirmek için özel tanýmlayýcý
+ 
     public class TurkishIdentityErrorDescriber : IdentityErrorDescriber
     {
         public override IdentityError DuplicateUserName(string userName)
